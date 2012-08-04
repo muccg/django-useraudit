@@ -5,7 +5,7 @@ from django.contrib.auth.signals import user_logged_in
 #class Log(models.Model):
 
 
-class FailedLogin(models.Model):
+class FailedLoginLog(models.Model):
     username = models.CharField(max_length=255, null=True, blank=True)
     ip_address = models.CharField(max_length=40, null=True, blank=True)
     user_agent = models.CharField(max_length=255, null=True, blank=True)

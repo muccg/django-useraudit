@@ -21,7 +21,7 @@ class LoginIsLoggedTest(TestCase):
                     'password': 'sue',
                     'this_is_the_login_form': 1,
         })
-        self.assertEquals(m.FailedLogin.objects.count(), 0)
+        self.assertEquals(m.FailedLoginLog.objects.count(), 0)
         self.assertEquals(m.LoginLog.objects.count(), 1)
         log = m.LoginLog.objects.all()[0]
         self.assertEquals(log.username, 'john')

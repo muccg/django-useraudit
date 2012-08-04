@@ -12,7 +12,7 @@ class AuthFailedLoggerBackend(object):
         username = credentials.get('username')
         ip_address = self.extract_ip_address()
         user_agent = get_request_header('USER_AGENT')
-        m.FailedLogin.objects.create(
+        m.FailedLoginLog.objects.create(
             username=username, 
             ip_address=ip_address,
             user_agent=user_agent
