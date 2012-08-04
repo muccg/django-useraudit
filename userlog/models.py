@@ -32,7 +32,7 @@ class LoginLogger(object):
         user_agent = None
         if request:
             ip_address = self.extract_ip_address(request)
-            user_agent = request.META.get('USER_AGENT')
+            user_agent = request.META.get('HTTP_USER_AGENT')
         return {
             'username': username,
             'ip_address': ip_address,
@@ -41,7 +41,7 @@ class LoginLogger(object):
 
     def extract_ip_address(self, request):
         ip = request.META.get('REMOTE_ADDR')
-        forwarded_for = request.META.get('X_FORWARDED_FOR')
+        forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if forwarded_for is not None:
             ip = forwarded_for.split(',')[0].strip()
         return ip

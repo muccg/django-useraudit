@@ -15,7 +15,7 @@ class LoginIsLoggedTest(TestCase):
         user.save()
   
     def test_login_is_logged(self):
-        client = Client(REMOTE_ADDR='192.168.1.1', USER_AGENT='Test client')
+        client = Client(REMOTE_ADDR='192.168.1.1', HTTP_USER_AGENT='Test client')
         client.post('/admin/', {
                     'username': 'john', 
                     'password': 'sue',
@@ -31,7 +31,7 @@ class LoginIsLoggedTest(TestCase):
 
     def test_ip_forwarded_by_proxies(self):
         client = Client(REMOTE_ADDR='1.1.1.1',
-                        X_FORWARDED_FOR='192.168.1.1, 2.2.2.2, 3.3.3.3')
+                        HTTP_X_FORWARDED_FOR='192.168.1.1, 2.2.2.2, 3.3.3.3')
         client.post('/admin/', {
                     'username': 'john', 
                     'password': 'sue',
