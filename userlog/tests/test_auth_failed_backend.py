@@ -30,7 +30,9 @@ class AuthFailedBackendTest(TestCase):
 class AuthFailedBackendEndToEndTest(TestCase):
 
      def test_authenticate_request_logs(self):
-        self.client.get('', REMOTE_ADDR='192.168.1.2', USER_AGENT='Some user agent')
+        self.client.get('', 
+            REMOTE_ADDR='192.168.1.2', 
+            USER_AGENT='Some user agent')
         auth.authenticate(username='some_user', password='some_pass')
 
         self.assertEquals(m.FailedLogin.objects.count(), 1)
@@ -40,4 +42,14 @@ class AuthFailedBackendEndToEndTest(TestCase):
         self.assertEquals(log.ip_address, '192.168.1.2')
         self.assertEquals(log.user_agent, 'Some user agent')
 
-   
+     def test_authenticate_request_logs_proxies(self):
+        self.client.get('', 
+            X_FORWARDED_FOR='192.168.1.2, 10.10.10.10, 20.20.20.20',
+            REMOTE_ADDR='192.168.1.100') 
+        auth.authenticate(username='some_user', password='some_pass')
+
+        self.assertEquals(m.FailedLogin.objects.count(), 1)
+        log = m.FailedLogin.objects.all()[0]
+        self.assertEquals(log.ip_address, '192.168.1.2')
+
+

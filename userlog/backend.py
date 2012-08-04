@@ -7,12 +7,10 @@ def get_request_header(name):
         return request.META[name]
 
 class AuthFailedLoggerBackend(object):
-    
 
     def authenticate(self, **credentials):
-        print get_request().META
         username = credentials.get('username')
-        ip_address = get_request_header('REMOTE_ADDR')
+        ip_address = self.extract_ip_address()
         user_agent = get_request_header('USER_AGENT')
         m.FailedLogin.objects.create(
             username=username, 
@@ -21,3 +19,10 @@ class AuthFailedLoggerBackend(object):
         )
 
         return None
+
+    def extract_ip_address(self):
+        ip = get_request_header('REMOTE_ADDR')
+        forwarded_for = get_request_header('X_FORWARDED_FOR')
+        if forwarded_for is not None:
+            ip = forwarded_for.split(',')[0].strip()
+        return ip
