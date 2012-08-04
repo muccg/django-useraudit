@@ -105,7 +105,7 @@ AUTHENTICATION_BACKENDS = (
     'userlog.backend.AuthFailedLoggerBackend'
 )
 
-ROOT_URLCONF = 'userlog.urls'
+ROOT_URLCONF = 'userlog.test_urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 #WSGI_APPLICATION = 'django_userlog.wsgi.application'
@@ -125,7 +125,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'userlog'
