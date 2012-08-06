@@ -8,8 +8,7 @@ except ImportError:
 setup(
     name='django-userlog',
     version='0.1',
-    description='A django middleware to record user log in ip addresses and user agent',
-    long_description='A django middleware to record user log in ip addresses and user agent',
+    description='A django apps to record user log in ip addresses and user agent',
     author='Tamas Szabo',
     url='https://bitbucket.org/ahunter_ccg/django-userlog',
     download_url='https://bitbucket.org/ahunter_ccg/django-userlog/downloads',
