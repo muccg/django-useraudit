@@ -3,6 +3,8 @@ from userlog.middleware import get_request
 
 class AuthFailedLoggerBackend(object):
 
+    supports_inactive_user = False
+
     def __init__(self):
         self.login_logger = m.LoginLogger()
 
