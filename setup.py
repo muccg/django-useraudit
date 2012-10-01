@@ -23,4 +23,9 @@ setup(
     packages=[
         'userlog',
     ],
+    package_data={
+        'userlog': [
+            'migrations/*'
+        ]
+    }
 )
