@@ -54,5 +54,6 @@ class AuthFailedBackendEndToEndTest(TestCase):
         self.assertEquals(m.FailedLoginLog.objects.count(), 1)
         log = m.FailedLoginLog.objects.all()[0]
         self.assertEquals(log.ip_address, '192.168.1.2')
+        self.assertEquals(log.forwarded_by, '192.168.1.100,20.20.20.20,10.10.10.10')
 
 

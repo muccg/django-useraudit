@@ -30,8 +30,8 @@ class LoginIsLoggedTest(TestCase):
         self.assertEquals(log.user_agent, 'Test client')
 
     def test_ip_forwarded_by_proxies(self):
-        client = Client(REMOTE_ADDR='1.1.1.1',
-                        HTTP_X_FORWARDED_FOR='192.168.1.1, 2.2.2.2, 3.3.3.3')
+        client = Client(REMOTE_ADDR='3.3.3.3',
+                        HTTP_X_FORWARDED_FOR='192.168.1.1, 1.1.1.1, 2.2.2.2')
         client.post('/admin/', {
                     'username': 'john', 
                     'password': 'sue',
@@ -39,4 +39,5 @@ class LoginIsLoggedTest(TestCase):
         })
         log = m.LoginLog.objects.all()[0]
         self.assertEquals(log.ip_address, '192.168.1.1')
+        self.assertEquals(log.forwarded_by, '3.3.3.3,2.2.2.2,1.1.1.1')
  

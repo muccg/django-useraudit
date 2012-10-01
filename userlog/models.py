@@ -8,6 +8,7 @@ class Log(models.Model):
 
     username = models.CharField(max_length=255, null=True, blank=True)
     ip_address = models.CharField(max_length=40, null=True, blank=True, verbose_name = "IP")
+    forwarded_by = models.CharField(max_length=1000, null=True, blank=True)
     user_agent = models.CharField(max_length=255, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -31,21 +32,27 @@ class LoginLogger(object):
         ip_address = None
         user_agent = None
         if request:
-            ip_address = self.extract_ip_address(request)
+            ip_address, proxies = self.extract_ip_address(request)
             user_agent = request.META.get('HTTP_USER_AGENT')
         return {
             'username': username,
             'ip_address': ip_address,
-            'user_agent': user_agent
+            'user_agent': user_agent,
+            'forwarded_by': ",".join(proxies) if proxies else None
         }
 
     def extract_ip_address(self, request):
-        ip = request.META.get('REMOTE_ADDR')
+        client_ip = request.META.get('REMOTE_ADDR')
+        proxies = None
         forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if forwarded_for is not None:
-            ip = forwarded_for.split(',')[0].strip()
-        return ip
-
+            closest_proxy = client_ip
+            forwarded_for_ips = [ip.strip() for ip in forwarded_for.split(',')]
+            client_ip = forwarded_for_ips.pop(0)
+            forwarded_for_ips.reverse()
+            proxies = [closest_proxy] + forwarded_for_ips
+            
+        return (client_ip, proxies)
   
 
 login_logger = LoginLogger()

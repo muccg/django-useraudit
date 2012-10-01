@@ -7,7 +7,7 @@ class LogAdmin(admin.ModelAdmin):
 
     search_fields = ['username']
     list_filter = ['timestamp']
-    list_display = ('username', 'ip_address', 'user_agent', 'timestamp')
+    list_display = ('username', 'ip_address', 'forwarded_by', 'user_agent', 'timestamp')
 
 
     # this disable the edit links. No supported way of doing it.
