@@ -1,4 +1,4 @@
-virt_django-userlog
+virt_django_userlog
 build
 .*\.pyc$
 .*\.swp$
