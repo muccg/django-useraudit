@@ -20,6 +20,7 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development"
     ],
+    zip_safe=False,
     packages=[
         'userlog',
     ],
