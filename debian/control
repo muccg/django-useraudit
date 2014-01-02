@@ -1,15 +1,26 @@
-Source: django-userlog
-Section: unknown
+Source: python-django-userlog
+Section: web
 Priority: extra
 Maintainer: Rodney Lorrimar <rlorrimar@ccg.murdoch.edu.au>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.4
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/django-userlog.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/django-userlog.git;a=summary
+Homepage: https://bitbucket.org/ccgmurdoch/django-userlog/wiki/Home
+Vcs-Hg: https://bitbucket.org/ccgmurdoch/django-userlog
+Vcs-Browser: https://bitbucket.org/ccgmurdoch/django-userlog/src
 
-Package: django-userlog
+Package: python-django-userlog
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: ${misc:Depends},
+         ${python:Depends},
+         python-django,
+         python-django-south
+Description: A django middleware to record user log in ip addresses and user agent.
+ Django Userlog is a small Django app that allow you to log basic
+ information about successful and failed login attempts to a database.
+ .
+ It logs the following information for each login/login attempt:
+  * Username
+  * IP address
+  * Forwarded by
+  * User Agent
+  * Timestamp
