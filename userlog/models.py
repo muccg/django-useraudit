@@ -29,16 +29,19 @@ class LoginLogger(object):
         log = LoginLog.objects.create(**fields)
 
     def extract_log_info(self, username, request):
-        ip_address = None
-        user_agent = None
         if request:
             ip_address, proxies = self.extract_ip_address(request)
             user_agent = request.META.get('HTTP_USER_AGENT')
+        else:
+            ip_address = None
+            proxies = None
+            user_agent = None
+
         return {
             'username': username,
             'ip_address': ip_address,
             'user_agent': user_agent,
-            'forwarded_by': ",".join(proxies) if proxies else None
+            'forwarded_by': ",".join(proxies or [])
         }
 
     def extract_ip_address(self, request):
@@ -51,15 +54,13 @@ class LoginLogger(object):
             client_ip = forwarded_for_ips.pop(0)
             forwarded_for_ips.reverse()
             proxies = [closest_proxy] + forwarded_for_ips
-            
+
         return (client_ip, proxies)
-  
+
 
 login_logger = LoginLogger()
 def login_callback(sender, user, request, **kwargs):
     login_logger.log_login(user.username, request)
-    
+
 # User logged in Django signal
 user_logged_in.connect(login_callback)
-
-
