@@ -12,7 +12,7 @@ Package: python-django-userlog
 Architecture: any
 Depends: ${misc:Depends},
          ${python:Depends},
-         python-django,
+         python-django (>= 1.5),
          python-django-south
 Description: A django middleware to record user log in ip addresses and user agent.
  Django Userlog is a small Django app that allow you to log basic
