@@ -7,11 +7,11 @@ except ImportError:
 
 setup(
     name='django-userlog',
-    version='0.2.2',
+    version='2.0.0',
     description='A django apps to record user log in ip addresses and user agent',
     author='Tamas Szabo',
-    url='https://bitbucket.org/ahunter_ccg/django-userlog',
-    download_url='https://bitbucket.org/ahunter_ccg/django-userlog/downloads',
+    url='https://bitbucket.org/ccgmurdoch/django-userlog',
+    download_url='https://bitbucket.org/ccgmurdoch/django-userlog/downloads',
     classifiers=[
         "Framework :: Django",
         "Intended Audience :: Developers",
