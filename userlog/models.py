@@ -60,7 +60,7 @@ class LoginLogger(object):
 
 login_logger = LoginLogger()
 def login_callback(sender, user, request, **kwargs):
-    login_logger.log_login(user.username, request)
+    login_logger.log_login(user.get_username(), request)
 
 # User logged in Django signal
 user_logged_in.connect(login_callback)
