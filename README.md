@@ -41,7 +41,7 @@ https://bitbucket.org/ccgmurdoch/ccg-django-extras/downloads
 Example for version 2.1.0:
 
 ```
-$ pip install https://bitbucket.org/ahunter_ccg/django-userlog/downloads/django-userlog-2.1.0.tar.gz
+$ pip install https://bitbucket.org/ccg-django-extras/downloads/django-userlog-2.1.0.tar.gz
 ```
 
 
