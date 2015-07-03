@@ -10,8 +10,8 @@ setup(
     version='2.1.0',
     description='A django apps to record user log in ip addresses and user agent',
     author='Tamas Szabo',
-    url='https://bitbucket.org/ccgmurdoch/django-userlog',
-    download_url='https://bitbucket.org/ccgmurdoch/django-userlog/downloads',
+    url='https://github.com/muccg/django-userlog',
+    download_url='https://bitbucket.org/ccgmurdoch/ccg-django-extras/downloads',
     classifiers=[
         "Framework :: Django",
         "Intended Audience :: Developers",
@@ -20,13 +20,10 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development"
     ],
-    zip_safe=False,
+    zip_safe=True,
     packages=[
         'userlog',
+        'userlog.migrations',
+        'userlog.south_migrations',
     ],
-    package_data={
-        'userlog': [
-            'migrations/*'
-        ]
-    }
 )
