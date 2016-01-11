@@ -23,7 +23,7 @@ the list, then you can't rely on the IP Address being correct.
 
 ## Requirements
 
-Has been developed and tested on Django 1.8, but should work on other
+Has been developed and tested on Django 1.9, but should work on other
 versions too.
 
 Supports South migrations for Django 1.7 and lower to make schema
@@ -34,14 +34,14 @@ for running the unit tests and sqlite3.
 
 ## Installation
 
-You can pip install using a link from the downloads page: 
+You can pip install using a link from the releases page:
 
-https://bitbucket.org/ccgmurdoch/ccg-django-extras/downloads
+https://github.com/muccg/django-userlog/releases
 
-Example for version 2.1.0:
+Example for version 2.2.0:
 
 ```
-$ pip install https://bitbucket.org/ccg-django-extras/downloads/django-userlog-2.1.0.tar.gz
+$ pip install https://github.com/muccg/django-userlog/archive/2.2.0.zip
 ```
 
 
