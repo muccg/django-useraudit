@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='django-userlog',
-    version='2.2.0',
+    version='2.3.0',
     description='A django apps to record user log in ip addresses and user agent',
     author='Tamas Szabo',
     url='https://github.com/muccg/django-userlog',

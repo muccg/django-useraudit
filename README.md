@@ -38,10 +38,10 @@ You can pip install using a link from the releases page:
 
 https://github.com/muccg/django-userlog/releases
 
-Example for version 2.2.0:
+Example for version 2.3.0:
 
 ```
-$ pip install https://github.com/muccg/django-userlog/archive/2.2.0.zip
+$ pip install https://github.com/muccg/django-userlog/archive/2.3.0.zip
 ```
 
 
