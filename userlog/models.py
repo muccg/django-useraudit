@@ -64,3 +64,9 @@ def login_callback(sender, user, request, **kwargs):
 
 # User logged in Django signal
 user_logged_in.connect(login_callback)
+
+
+# Import password expiry module so that the signal is registered.
+# The password expiry feature won't be active unless the necessary
+# settings are present.
+from . import password_expiry  # noqa
