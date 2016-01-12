@@ -1,5 +1,0 @@
-virt_django_userlog
-build
-.*\.pyc$
-.*\.swp$
-db.sqlite3
