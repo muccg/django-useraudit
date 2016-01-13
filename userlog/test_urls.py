@@ -1,19 +1,9 @@
-from django.conf.urls import patterns, include, url
-
-# Uncomment the next two lines to enable the admin:
+from django.conf.urls import include, url
 from django.contrib import admin
+from .views import test_request_available
 admin.autodiscover()
 
-urlpatterns = patterns('userlog.views',
-    # Examples:
-    # url(r'^$', 'django_userlog.views.home', name='home'),
-    # url(r'^django_userlog/', include('django_userlog.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
+urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-
-    url(r'test_request_available[/]?$', 'test_request_available'),
-)
+    url(r'test_request_available[/]?$', test_request_available),
+]

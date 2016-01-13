@@ -1,5 +1,6 @@
 from django.http import HttpResponse, HttpResponseNotFound
-import middleware
+from . import middleware
+
 
 def test_request_available(request):
     thread_request = middleware.get_request()
