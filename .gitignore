@@ -4,3 +4,5 @@
 *.pyc
 *.swp
 db.sqlite3
+.tox
+.coverage
