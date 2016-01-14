@@ -60,6 +60,7 @@ How to use:
 from collections import namedtuple
 from datetime import timedelta
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.core.exceptions import PermissionDenied
 from django.db.models.signals import pre_save
@@ -95,17 +96,12 @@ def update_date_changed(user, attrs):
         setattr(user, attrs.date_changed, timezone.now())
 
 
-def is_expired_today(date, expiry_days):
-    if expiry_days > 0 and date is not None:
-        exp = date + timedelta(days=expiry_days)
-        return timezone.now() > exp
-    return False
-
-
 def is_password_expired(user):
-    expiry = ExpirySettings.get().num_days
-    change_date = get_password_change_date(user)
-    return is_expired_today(change_date, expiry)
+    earliest = ExpirySettings.get().earliest_possible_password_change
+    if earliest:
+        change_date = get_password_change_date(user)
+        return change_date and change_date < earliest
+    return False
 
 
 def get_password_change_date(user):
@@ -127,12 +123,10 @@ def get_user_last_login(user):
 
 
 def is_account_expired(user):
-    expiry = ExpirySettings.get().account_expiry
-
-    if expiry > 0:
+    earliest = ExpirySettings.get().earliest_possible_login
+    if earliest:
         last_login = get_user_last_login(user)
-        return is_expired_today(last_login, expiry)
-
+        return last_login and last_login < earliest
     return False
 
 
@@ -146,32 +140,63 @@ class ExpirySettings(namedtuple("ExpirySettings", ["num_days", "num_warning_days
         account_expiry = getattr(settings, "ACCOUNT_EXPIRY_DAYS", None) or 0
         return cls(expiry, warning, date_changed, password, account_expiry)
 
-
-class UserExpiryBackend(ModelBackend):
-    """
-    This backend doesn't authenticate, it just prevents authentication
-    of a user whose password or account has expired.
-    """
-    def authenticate(self, **creds):
-        user = ModelBackend.authenticate(self, **creds)
-
-        if user:
-            self._check_password_expiry(user)
-            self._check_account_expiry(user)
-
-        # pass on to next handler
+    @property
+    def earliest_possible_login(self):
+        if self.account_expiry > 0:
+            return timezone.now() - timedelta(days=self.account_expiry)
         return None
 
-    def _check_password_expiry(self, user):
-        if is_password_expired(user):
+    @property
+    def earliest_possible_password_change(self):
+        if self.num_days > 0:
+            return timezone.now() - timedelta(days=self.num_days)
+        return None
+
+
+class PasswordExpiryBackend(object):
+    """
+    This backend doesn't authenticate, it just prevents authentication
+    of a user whose password has expired.
+    """
+    def authenticate(self, username=None, password=None, **kwargs):
+        user = self._lookup_user(username, password, **kwargs)
+
+        if user and is_password_expired(user):
             logger.info("User's password has expired: %s" % user)
             password_has_expired.send(sender=user.__class__, user=user)
             raise PermissionDenied("Password has expired")
 
-    def _check_account_expiry(self, user):
-        if is_account_expired(user):
+        # pass on to next handler
+        return None
+
+    def _lookup_user(self, username=None, password=None, **kwargs):
+        # This is the same procedure as in
+        # django.contrib.auth.backends.ModelBackend, except without
+        # the timing attack mitigation, because it doesn't take long
+        # to check for expired passwords.
+        UserModel = get_user_model()
+        if username is None:
+            username = kwargs.get(UserModel.USERNAME_FIELD)
+        try:
+            return UserModel._default_manager.get_by_natural_key(username)
+        except UserModel.DoesNotExist:
+            return None
+
+
+class AccountExpiryBackend(ModelBackend):
+    """
+    This backend doesn't authenticate, it just prevents authentication
+    of a user whose account has expired.
+    """
+    def authenticate(self, **creds):
+        user = ModelBackend.authenticate(self, **creds)
+
+        if user and is_account_expired(user):
             logger.info("Disabling stale user account: %s" % user)
             user.is_active = False
             user.save()
             account_has_expired.send(sender=user.__class__, user=user)
             raise PermissionDenied("Account has expired")
+
+        # pass on to next handler
+        return None
