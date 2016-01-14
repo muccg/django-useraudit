@@ -11,15 +11,22 @@ It will disable unused accounts. If users haven't logged in for a
 certain time period, their account will be disabled next time a login
 is attemped.
 
+Requirement for password expiry: a custom auth user model is used.
+
+Requirement for account expiry: whichever user model is used should
+implement AbstractBaseUser (standard Django user model does of
+course).
+
 
 How to use:
 
 1. Add "userlog" to the list of INSTALLED_APPS.
 
-2. Add password expiry *first* in the list of auth backends::
+2. Put expiry backends *first* in the list of auth backends::
 
        AUTHENTICATION_BACKENDS = (
-           'userlog.password_expiry.UserExpiryBackend',
+           'userlog.password_expiry.AccountExpiryBackend',
+           'userlog.password_expiry.PasswordExpiryBackend',
            # ... the rest ...
        )
 
@@ -50,11 +57,19 @@ How to use:
 
 5. Add log handlers for "django.security" if they aren't already there.
 
-6. Add code to your frontend to nag the user if their password is due
+6. Inspect all non-standard login views and make sure they are
+   checking for User.is_active.
+
+7. Add code to your frontend to nag the user if their password is due
    to expire. Otherwise one day they will be unable to login and they
    won't know why.
 
    todo: add an automatic process for e-mailing users before password expiry
+
+8. In your deployment scripts, include a daily cronjob to run the
+   disable_inactive_users management command. This will let users know
+   if their account has been disabled. It requires the Sites framework
+   to be enabled, and for the user model to have an "email" attribute.
 """
 
 from collections import namedtuple
@@ -70,7 +85,8 @@ import logging
 
 logger = logging.getLogger("django.security")
 
-__all__ = ["UserExpiryBackend", "password_has_expired", "account_has_expired"]
+__all__ = ["AccountExpiryBackend", "PasswordExpiryBackend",
+           "password_has_expired", "account_has_expired"]
 
 password_has_expired = Signal(providing_args=["user"])
 account_has_expired = Signal(providing_args=["user"])
