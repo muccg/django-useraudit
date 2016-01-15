@@ -29,7 +29,11 @@ How to use:
            # ... the rest ...
        )
 
-3. Use a django custom auth model for your users and add a field for
+3. Use either Option A or Option B depending on your app.
+    - A: Django custom auth model
+    - B: "Profile" model related OneToOne with stock django User
+
+   Option A: Use a django custom auth model for your users and add a field for
    password expiry::
 
        # settings.py
@@ -44,6 +48,24 @@ How to use:
                auto_now_add=True,
                null=True,
            )
+
+   Option B: Use your existing profile model or create a new one, and
+   add a field for password expiry::
+
+       # settings.py
+       AUTH_USER_MODEL_PASSWORD_CHANGE_DATE_ATTR = "myprofile.password_change_date"
+
+       # models.py
+       from django.db import models
+       from django.contrib.auth.models import User
+
+       class MyProfile(models.Model):
+           user = models.OneToOneField(User, on_delete=models.CASCADE)
+           password_change_date = models.DateTimeField(
+               auto_now_add=True,
+               null=True,
+           )
+
 
 4. Configure the settings relevant to password expiry::
 
@@ -121,10 +143,18 @@ def is_password_expired(user):
 def get_password_change_date(user):
     attr = ExpirySettings.get().date_changed
     if attr:
-        if hasattr(user, attr):
-            return getattr(user, attr)
+        val = user
+        if isinstance(attr, str):
+            for part in attr.split("."):
+                if hasattr(val, part):
+                    val = getattr(val, part)
+                else:
+                    logger.warning("User model does not have a %s attribute" % attr)
+                    return None
+            return val
         else:
-            logger.warning("User model does not have a %s attribute" % attr)
+            logger.warning("Password change attr in settings is not a string")
+
     return None
 
 
