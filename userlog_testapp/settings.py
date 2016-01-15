@@ -14,7 +14,6 @@ PASSWORD_EXPIRY_DAYS = 10
 ACCOUNT_EXPIRY_DAYS = 5
 AUTHENTICATION_BACKENDS = (
     'userlog.password_expiry.AccountExpiryBackend',
-    'userlog.password_expiry.PasswordExpiryBackend',
     'django.contrib.auth.backends.ModelBackend',
     'userlog.backend.AuthFailedLoggerBackend',
 )

@@ -22,11 +22,10 @@ How to use:
 
 1. Add "userlog" to the list of INSTALLED_APPS.
 
-2. Put expiry backends *first* in the list of auth backends::
+2. Put expiry backend *first* in the list of auth backends::
 
        AUTHENTICATION_BACKENDS = (
            'userlog.password_expiry.AccountExpiryBackend',
-           'userlog.password_expiry.PasswordExpiryBackend',
            # ... the rest ...
        )
 
@@ -76,7 +75,6 @@ from collections import namedtuple
 from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.backends import ModelBackend
 from django.core.exceptions import PermissionDenied
 from django.db.models.signals import pre_save
 from django.dispatch import receiver, Signal
@@ -85,7 +83,7 @@ import logging
 
 logger = logging.getLogger("django.security")
 
-__all__ = ["AccountExpiryBackend", "PasswordExpiryBackend",
+__all__ = ["AccountExpiryBackend",
            "password_has_expired", "account_has_expired"]
 
 password_has_expired = Signal(providing_args=["user"])
@@ -169,18 +167,32 @@ class ExpirySettings(namedtuple("ExpirySettings", ["num_days", "num_warning_days
         return None
 
 
-class PasswordExpiryBackend(object):
+class AccountExpiryBackend(object):
     """
     This backend doesn't authenticate, it just prevents authentication
-    of a user whose password has expired.
+    of a user whose account password has expired.
     """
     def authenticate(self, username=None, password=None, **kwargs):
         user = self._lookup_user(username, password, **kwargs)
 
-        if user and is_password_expired(user):
-            logger.info("User's password has expired: %s" % user)
-            password_has_expired.send(sender=user.__class__, user=user)
-            raise PermissionDenied("Password has expired")
+        if user:
+            # Prevent authentication of inactive users (if the user
+            # model supports it). Django only checks is_active at the
+            # login view level.
+            if hasattr(user, "is_active") and not user.is_active:
+                raise PermissionDenied("Account is not active")
+
+            if is_password_expired(user):
+                logger.info("User's password has expired: %s" % user)
+                password_has_expired.send(sender=user.__class__, user=user)
+                raise PermissionDenied("Password has expired")
+
+            if  is_account_expired(user):
+                logger.info("Disabling stale user account: %s" % user)
+                user.is_active = False
+                user.save()
+                account_has_expired.send(sender=user.__class__, user=user)
+                raise PermissionDenied("Account has expired")
 
         # pass on to next handler
         return None
@@ -189,7 +201,7 @@ class PasswordExpiryBackend(object):
         # This is the same procedure as in
         # django.contrib.auth.backends.ModelBackend, except without
         # the timing attack mitigation, because it doesn't take long
-        # to check for expired passwords.
+        # to check for expiry.
         UserModel = get_user_model()
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
@@ -197,22 +209,3 @@ class PasswordExpiryBackend(object):
             return UserModel._default_manager.get_by_natural_key(username)
         except UserModel.DoesNotExist:
             return None
-
-
-class AccountExpiryBackend(ModelBackend):
-    """
-    This backend doesn't authenticate, it just prevents authentication
-    of a user whose account has expired.
-    """
-    def authenticate(self, **creds):
-        user = ModelBackend.authenticate(self, **creds)
-
-        if user and is_account_expired(user):
-            logger.info("Disabling stale user account: %s" % user)
-            user.is_active = False
-            user.save()
-            account_has_expired.send(sender=user.__class__, user=user)
-            raise PermissionDenied("Account has expired")
-
-        # pass on to next handler
-        return None
