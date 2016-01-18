@@ -80,6 +80,23 @@ class ExpiryTestCase(TestCase):
     ###########################################################################
     # password expiry test cases
 
+    def test_changing_of_password_updates_password_change_date_field(self):
+        self.setuser(password_change_date=timezone.now() - timedelta(days=1))
+        before_the_change = timezone.now()
+        self.user.set_password('the new password')
+        self.user.save()
+        self.user.refresh_from_db()
+        self.assertGreater(self.user.password_change_date, before_the_change)
+
+    def test_saving_same_password_does_not_update_password_change_date_field(self):
+        one_day_ago = password_change_date=timezone.now() - timedelta(days=1)
+        self.setuser(password_change_date=one_day_ago)
+        self.user.set_password('testuser') # same password
+        self.user.save()
+        self.user.refresh_from_db()
+        self.assertEquals(one_day_ago, self.user.password_change_date, "Password change date shouldn't change")
+
+
     @override_settings(PASSWORD_EXPIRY_DAYS=5)
     def test_password_not_expired(self):
         u = self.authenticate()
@@ -178,6 +195,15 @@ class ProfileExpiryTestCase(TestCase):
 
     ###########################################################################
     # user profile password expiry test cases
+
+    def test_changing_of_password_updates_password_change_date_field(self):
+        self.user.myprofile.password_change_date = timezone.now() - timedelta(days=1)
+        self.user.myprofile.save()
+        before_the_change = timezone.now()
+        self.user.set_password('the new password')
+        self.user.save()
+        self.user.refresh_from_db()
+        self.assertGreater(self.user.myprofile.password_change_date, before_the_change)
 
     @override_settings(PASSWORD_EXPIRY_DAYS=5)
     def test_password_not_expired(self):
