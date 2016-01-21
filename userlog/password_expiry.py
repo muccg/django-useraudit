@@ -113,23 +113,39 @@ account_has_expired = Signal(providing_args=["user"])
 
 
 @receiver(pre_save, sender=settings.AUTH_USER_MODEL)
-def set_password_changed(sender, instance=None, created=False, raw=False, **kwargs):
+def set_password_changed(sender, instance=None, raw=False, **kwargs):
     attrs = ExpirySettings.get()
-    if not raw and attrs.date_changed:
-        update_date_changed(instance, attrs)
+    # We're saving the password change date only for existing users
+    # Users just created should be taken care of by auto_now_add.
+    # This way we can assume that a User profile object already exists
+    # for the user. This is essential, because password change detection
+    # can happen only in pre_save, in post_save it is too late.
+    is_existing_user = instance.pk is not None
+    if not raw and is_existing_user and attrs.date_changed:
+        update_date_changed(instance, attrs.date_changed)
 
 
-def update_date_changed(user, attrs):
-    if user.pk is not None:
-        # do another query to get user's previous password
-        old_user = type(user).objects.get(pk=user.pk)
-        old_password = getattr(old_user, attrs.password)
-    else:
-        # user is not created yet
-        old_password = None
+def update_date_changed(user, date_changed_attr):
+    def did_password_change(user):
+        current_user = get_user_model().objects.get(pk=user.pk)
+        return current_user.password != user.password
 
-    if old_password != user.password:
-        setattr(user, attrs.date_changed, timezone.now())
+    def save_profile_password_change_date(user, date):
+        parts = date_changed_attr.split('.')
+        attr_name = parts[-1]
+        profile = reduce(lambda obj, attr: getattr(obj, attr), parts[:-1], user)
+        setattr(profile, attr_name, date)
+        profile.save()
+
+    def set_password_change_date(user, date):
+        setattr(user, date_changed_attr, date)
+
+    if did_password_change(user):
+        now = timezone.now()
+        if '.' in date_changed_attr:
+            save_profile_password_change_date(user, now)
+        else:
+            set_password_change_date(user, now)
 
 
 def is_password_expired(user):

@@ -22,6 +22,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': ':memory:',
+#        'NAME': 'test_db',
     }
 }
 SECRET_KEY = "."
