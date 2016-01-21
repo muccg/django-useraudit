@@ -30,4 +30,3 @@ before_script:
   - coverage erase
 script: tox
 after_success: coveralls
-
