@@ -94,6 +94,7 @@ How to use:
 """
 
 from collections import namedtuple
+from functools import reduce
 from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
