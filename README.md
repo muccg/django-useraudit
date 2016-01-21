@@ -1,6 +1,6 @@
 # Welcome
 
-[![Build Status](https://travis-ci.org/muccg/django-userlog.svg)](https://travis-ci.org/muccg/django-userlog)
+[![Build Status](https://travis-ci.org/muccg/django-useraudit.svg)](https://travis-ci.org/muccg/django-useraudit)
 
 Django Userlog is a small Django app that allow you to log basic
 information about successful and failed login attempts to a database.
