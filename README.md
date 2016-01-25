@@ -176,7 +176,7 @@ The cron job should run the `disable_inactive_users` custom Django command.
 
 ## Done
 
-Useraudit is set up and will log all log in attempts for your project.
+Useraudit is set up to log all log in attempts for your project and expire user accounts.
 
 In case you would like to know the technical details please go to the
 [how it works](https://github.com/muccg/django-useraudit/wiki/How-it-works)
