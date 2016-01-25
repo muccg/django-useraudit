@@ -9,9 +9,11 @@ setup(
     name='django-useraudit',
     version='1.0.0',
     description='Django user audit utilities like logging user log in, disabling access when password expires or user is inactive',
+    long_description='Django user audit utilities like logging user log in, disabling access when password expires or user is inactive',
     author='CCG, Murdoch University',
+    author_email='devops@ccg.murdoch.edu.au',
     url='https://github.com/muccg/django-useraudit',
-    download_url='https://github.com/muccg/django-useraudit/downloads',
+    download_url='https://github.com/muccg/django-useraudit/releases',
     classifiers=[
         "Framework :: Django",
         "Intended Audience :: Developers",
@@ -26,4 +28,5 @@ setup(
         'useraudit.migrations',
         'useraudit.south_migrations',
     ],
+    include_package_date=True,
 )
