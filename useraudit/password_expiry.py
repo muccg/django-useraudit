@@ -101,7 +101,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver, Signal
 from django.utils import timezone
 import logging
-from backend import AuthFailedLoggerBackend
+from .backend import AuthFailedLoggerBackend
 
 logger = logging.getLogger("django.security")
 
