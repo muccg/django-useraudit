@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from userlog import models as m
-from userlog.middleware import get_request
+from useraudit import models as m
+from useraudit.middleware import get_request
 
 class AuthFailedLoggerBackend(object):
 

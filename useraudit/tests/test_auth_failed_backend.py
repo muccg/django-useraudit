@@ -1,9 +1,9 @@
 from django.test import TestCase
 from django.contrib import auth
 
-from userlog.backend import AuthFailedLoggerBackend
-from userlog import models as m
-from userlog.tests.utils import is_recent
+from useraudit.backend import AuthFailedLoggerBackend
+from useraudit import models as m
+from useraudit.tests.utils import is_recent
 
 class AuthFailedBackendTest(TestCase):
   

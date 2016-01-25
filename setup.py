@@ -6,12 +6,12 @@ except ImportError:
     from distutils.core import setup
 
 setup(
-    name='django-userlog',
-    version='2.3.0',
-    description='A django apps to record user log in ip addresses and user agent',
-    author='Tamas Szabo',
-    url='https://github.com/muccg/django-userlog',
-    download_url='https://bitbucket.org/ccgmurdoch/ccg-django-extras/downloads',
+    name='django-useraudit',
+    version='1.0.0',
+    description='Django user audit utilities like logging user log in, disabling access when password expires or user is inactive',
+    author='CCG, Murdoch University',
+    url='https://github.com/muccg/django-useraudit',
+    download_url='https://github.com/muccg/django-useraudit/downloads',
     classifiers=[
         "Framework :: Django",
         "Intended Audience :: Developers",
@@ -22,8 +22,8 @@ setup(
     ],
     zip_safe=True,
     packages=[
-        'userlog',
-        'userlog.migrations',
-        'userlog.south_migrations',
+        'useraudit',
+        'useraudit.migrations',
+        'useraudit.south_migrations',
     ],
 )

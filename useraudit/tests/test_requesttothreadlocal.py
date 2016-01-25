@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from userlog.middleware import get_request
+from useraudit.middleware import get_request
 
 class RequestToThreadLocalMiddlewareTest(TestCase):
    

@@ -11,8 +11,6 @@ It will disable unused accounts. If users haven't logged in for a
 certain time period, their account will be disabled next time a login
 is attemped.
 
-Requirement for password expiry: a custom auth user model is used.
-
 Requirement for account expiry: whichever user model is used should
 implement AbstractBaseUser (standard Django user model does of
 course).
@@ -20,12 +18,12 @@ course).
 
 How to use:
 
-1. Add "userlog" to the list of INSTALLED_APPS.
+1. Add "useraudit" to the list of INSTALLED_APPS.
 
 2. Put expiry backend *first* in the list of auth backends::
 
        AUTHENTICATION_BACKENDS = (
-           'userlog.password_expiry.AccountExpiryBackend',
+           'useraudit.password_expiry.AccountExpiryBackend',
            # ... the rest ...
        )
 

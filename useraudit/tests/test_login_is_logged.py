@@ -2,8 +2,8 @@ from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth.models import User
 
-from userlog import models as m
-from userlog.tests.utils import is_recent
+from useraudit import models as m
+from useraudit.tests.utils import is_recent
 
 from datetime import datetime, timedelta
 

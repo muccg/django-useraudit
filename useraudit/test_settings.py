@@ -1,4 +1,4 @@
-# Django test settings for django userlog project.
+# Django test settings for django useraudit project.
 
 from os import path
 
@@ -99,7 +99,7 @@ TEMPLATES = [{
 }]
 
 MIDDLEWARE_CLASSES = (
-    'userlog.middleware.RequestToThreadLocalMiddleware',
+    'useraudit.middleware.RequestToThreadLocalMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -111,13 +111,13 @@ MIDDLEWARE_CLASSES = (
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'userlog.backend.AuthFailedLoggerBackend'
+    'useraudit.backend.AuthFailedLoggerBackend'
 )
 
-ROOT_URLCONF = 'userlog.test_urls'
+ROOT_URLCONF = 'useraudit.test_urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-#WSGI_APPLICATION = 'django_userlog.wsgi.application'
+#WSGI_APPLICATION = 'django_useraudit.wsgi.application'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -130,7 +130,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'userlog'
+    'useraudit'
 )
 
 # A sample logging configuration. The only tangible logging

@@ -1,6 +1,6 @@
 /build/
 /dist/
-/django_userlog.egg-info/
+/django_useraudit.egg-info/
 *.pyc
 *.swp
 db.sqlite3

@@ -12,8 +12,8 @@ from django.utils import timezone
 import re
 import unittest
 
-from userlog_testapp.models import MyUser, MyProfile
-import userlog.password_expiry
+from useraudit_testapp.models import MyUser, MyProfile
+import useraudit.password_expiry
 
 # Saving a reference to the USER_MODEL set in the settings.py file
 # Our pre_save handler in password_expiry.py gets registered just for this sender
@@ -28,12 +28,12 @@ USER_MODEL = settings.AUTH_USER_MODEL
 def register_pre_save_on_AUTH_USER_MODER_change(sender, setting, value, enter, **kwargs):
     if setting == 'AUTH_USER_MODEL' and value != USER_MODEL:
         if enter:
-            pre_save.connect(userlog.password_expiry.set_password_changed, sender=value)
+            pre_save.connect(useraudit.password_expiry.set_password_changed, sender=value)
         else:
-            pre_save.disconnect(userlog.password_expiry.set_password_changed, sender=value)
+            pre_save.disconnect(useraudit.password_expiry.set_password_changed, sender=value)
 
 
-@override_settings(AUTH_USER_MODEL="userlog_testapp.MyUser")
+@override_settings(AUTH_USER_MODEL="useraudit_testapp.MyUser")
 class ExpiryTestCase(TestCase):
     username = "testuser"
     password = "testuser"
@@ -174,12 +174,12 @@ class ExpiryTestCase(TestCase):
         self.assertIsNone(user)
 
 
-@receiver(userlog.password_expiry.password_has_expired)
+@receiver(useraudit.password_expiry.password_has_expired)
 def handle_password_expired(**kwargs):
     ExpiryTestCase.password_expired_signal = kwargs
 
 
-@receiver(userlog.password_expiry.account_has_expired)
+@receiver(useraudit.password_expiry.account_has_expired)
 def handle_account_expired(**kwargs):
     ExpiryTestCase.account_expired_signal = kwargs
 

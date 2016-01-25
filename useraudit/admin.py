@@ -1,5 +1,5 @@
 from django.contrib import admin
-from userlog import models as m
+from useraudit import models as m
 
 
 class LogAdmin(admin.ModelAdmin):
