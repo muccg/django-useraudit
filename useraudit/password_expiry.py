@@ -229,7 +229,6 @@ class AccountExpiryBackend(object):
                 self._prevent_login(username, "Account is not active")
 
             if is_password_expired(user):
-                logger.info("User's password has expired: %s" % user)
                 password_has_expired.send(sender=user.__class__, user=user)
                 self._prevent_login(username, "Password has expired")
 
@@ -248,7 +247,7 @@ class AccountExpiryBackend(object):
             auth_backends = getattr(settings, 'AUTHENTICATION_BACKENDS', [])
             return 'useraudit.backend.AuthFailedLoggerBackend' in auth_backends
 
-        logger.info("Login Prevented! %s", msg)
+        logger.info("Login Prevented for user '%s'! %s", username, msg)
         if is_failed_login_logger_configured():
             AuthFailedLoggerBackend().authenticate(username=username)
         raise PermissionDenied(msg)
