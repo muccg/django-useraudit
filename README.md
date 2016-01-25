@@ -8,6 +8,11 @@ Django Useraudit is a small collection of user audit utilities containing:
 * disabling accounts of inactive users
 * disabling accounts of users who haven't changed their passwords frequently enough
 
+Django Useraudit is developed at CCG, Murdoch University, Western Australia.
+
+[CCG Website](https://ccg.murdoch.edu.au/ "CCG Website")
+
+
 ## Features
 
 ### User login log
