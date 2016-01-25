@@ -101,6 +101,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver, Signal
 from django.utils import timezone
 import logging
+from backend import AuthFailedLoggerBackend
 
 logger = logging.getLogger("django.security")
 
@@ -225,22 +226,32 @@ class AccountExpiryBackend(object):
             # model supports it). Django only checks is_active at the
             # login view level.
             if hasattr(user, "is_active") and not user.is_active:
-                raise PermissionDenied("Account is not active")
+                self._prevent_login(username, "Account is not active")
 
             if is_password_expired(user):
                 logger.info("User's password has expired: %s" % user)
                 password_has_expired.send(sender=user.__class__, user=user)
-                raise PermissionDenied("Password has expired")
+                self._prevent_login(username, "Password has expired")
 
             if  is_account_expired(user):
                 logger.info("Disabling stale user account: %s" % user)
                 user.is_active = False
                 user.save()
                 account_has_expired.send(sender=user.__class__, user=user)
-                raise PermissionDenied("Account has expired")
+                self._prevent_login(username, "Account has expired")
 
         # pass on to next handler
         return None
+
+    def _prevent_login(self, username, msg="User login prevented"):
+        def is_failed_login_logger_configured():
+            auth_backends = getattr(settings, 'AUTHENTICATION_BACKENDS', [])
+            return 'useraudit.backend.AuthFailedLoggerBackend' in auth_backends
+
+        logger.info("Login Prevented! %s", msg)
+        if is_failed_login_logger_configured():
+            AuthFailedLoggerBackend().authenticate(username=username)
+        raise PermissionDenied(msg)
 
     def _lookup_user(self, username=None, password=None, **kwargs):
         # This is the same procedure as in

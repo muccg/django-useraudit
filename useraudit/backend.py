@@ -1,13 +1,13 @@
 from django.contrib.auth import get_user_model
-from useraudit import models as m
-from useraudit.middleware import get_request
+from .models import LoginLogger
+from .middleware import get_request
 
 class AuthFailedLoggerBackend(object):
 
     supports_inactive_user = False
 
     def __init__(self):
-        self.login_logger = m.LoginLogger()
+        self.login_logger = LoginLogger()
 
     def authenticate(self, **credentials):
         UserModel = get_user_model()
