@@ -1,5 +1,29 @@
 from django.db import models
 from django.contrib.auth.signals import user_logged_in
+import datetime
+
+
+class LoginAttempt(models.Model):
+    username = models.CharField(max_length=255, null=True, blank=True)
+    count = models.PositiveIntegerField(null=True, blank=True, default=0)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+class LoginAttemptLogger(object):
+
+    def reset(self, username):
+        defaults = {
+            'count': 0,
+            'timestamp': datetime.datetime.now()
+        }
+        LoginAttempt.objects.update_or_create(username=username, defaults=defaults)
+
+    def increment(self, username):
+        obj, created = LoginAttempt.objects.get_or_create(username=username)
+        obj.count += 1
+        obj.timestamp = datetime.datetime.now()
+        obj.save()
+
 
 class Log(models.Model):
     class Meta:
@@ -59,8 +83,10 @@ class LoginLogger(object):
 
 
 login_logger = LoginLogger()
+login_attempt_logger = LoginAttemptLogger()
 def login_callback(sender, user, request, **kwargs):
     login_logger.log_login(user.get_username(), request)
+    login_attempt_logger.reset(user.get_username())
 
 # User logged in Django signal
 user_logged_in.connect(login_callback)
