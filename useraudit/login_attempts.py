@@ -19,13 +19,13 @@ class LoginAttemptsBackend(object):
     def authenticate(self, **credentials):
         if self.is_login_limit():
             logger.info("Login failure limit is enabled")
-            username = credentials['username']
-            count = self._get_count(username)
+            self.username = credentials['username']
+            count = self._get_count()
             if count and count >= self.login_limit:
-                if self._deactivate_user(username):
-                    logger.warning("Username '%s' has been blocked" % username)
+                if self._deactivate_user():
+                    logger.warning("Username '%s' has been blocked" % self.username)
                     self.notification()
-                    raise PermissionDenied("Username '%s' has been blocked" % username)
+                    raise PermissionDenied("Username '%s' has been blocked" % self.username)
         return None
 
     def is_login_limit(self):
@@ -33,23 +33,23 @@ class LoginAttemptsBackend(object):
             return True
         return False
     
-    def _get_count(self, username):
+    def _get_count(self):
         try:
-            obj = LoginAttempt.objects.get(username = username)
+            obj = LoginAttempt.objects.get(username = self.username)
             return obj.count
         except LoginAttempt.DoesNotExist:
             return None
 
-    def _get_user(self, username):
+    def _get_user(self):
         UserModel = get_user_model()
         try:
-            return UserModel._default_manager.get_by_natural_key(username)
+            return UserModel._default_manager.get_by_natural_key(self.username)
         except UserModel.DoesNotExist:
-            logger.warning("User model for username %s not found" % username)
+            logger.warning("User model for username %s not found" % self.username)
             return None
 
-    def _deactivate_user(self, username):
-        user = self._get_user(username)
+    def _deactivate_user(self):
+        user = self._get_user()
         if user:
             user.is_active = False
             user.save(update_fields=["is_active"])

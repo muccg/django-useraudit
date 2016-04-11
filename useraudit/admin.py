@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.contrib import admin
 from useraudit import models as m
@@ -24,7 +25,8 @@ class LoginAttemptAdmin(admin.ModelAdmin):
             user = UserModel._default_manager.get_by_natural_key(obj.username)
             if user.is_active:
                 return "Active"
-            return "<a href=''>Activate</a>"
+            activation_url = reverse("reactivate_user", args=[user.id,])
+            return "<a href='%s'>Activate</a>" % activation_url
         except UserModel.DoesNotExist:
             return "N/A"
     
