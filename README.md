@@ -41,6 +41,24 @@ The user accounts are disabled on user login by default.
 You can also run the `disable_inactive_users` from a cron job to disable inactive
 user accounts.
 
+### Login attempts limit
+
+The setting `LOGIN_FAILURE_LIMIT` allows to enable a number of allowed login attempts.
+If the settings is not set or set to 0, the feature is disabled. This feature also
+requires 'useraudit.login_attempts.LoginAttemptsBackend' backend.
+
+The backend has a hook that allows to set up notification on exceeded number of allowed
+attempts and locked out account. This can be done by extending the backend and
+overriding 'notification' function:
+
+```
+    ...
+    def notification(self):
+        # Custom notification
+        return
+    ...
+```
+
 ## Requirements
 
 Has been developed and tested on Django 1.9, but should work on other
@@ -139,7 +157,8 @@ Add `useraudit.backend.AuthFailedLoggerBackend` to
 AUTHENTICATION_BACKENDS = (
     'useraudit.password_expiry.AccountExpiryBackend',
     'django.contrib.auth.backends.ModelBackend',
-    'useraudit.backend.AuthFailedLoggerBackend'
+    'useraudit.backend.AuthFailedLoggerBackend',
+    'useraudit.login_attempts.LoginAttemptsBackend'
 )
 ```
 
@@ -152,6 +171,8 @@ Configure the settings relevant to account and password expiry:
        PASSWORD_EXPIRY_WARNING_DAYS = 30
        # # Disable the user's account if they haven't logged in for this time
        # ACCOUNT_EXPIRY_DAYS = 100
+       # Set to 0 disables the feature
+       LOGIN_FAILURE_LIMIT = 3
 ```
 
 ### Password expiration warnings in frontend code
