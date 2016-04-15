@@ -21,10 +21,9 @@ class AuthFailedLoggerBackend(object):
 
     def authenticate(self, **credentials):
         UserModel = get_user_model()
-        username = credentials.get(UserModel.USERNAME_FIELD, None)
-        self.username = username or credentials.get(get_user_model().USERNAME_FIELD)
-        self.login_logger.log_failed_login(username, get_request())
-        self.login_attempt_logger.increment(username)
+        self.username = credentials.get(get_user_model().USERNAME_FIELD)
+        self.login_logger.log_failed_login(self.username, get_request())
+        self.login_attempt_logger.increment(self.username)
         self.attemps_status()
 
         return None
