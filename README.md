@@ -44,12 +44,11 @@ user accounts.
 ### Login attempts limit
 
 The setting `LOGIN_FAILURE_LIMIT` allows to enable a number of allowed login attempts.
-If the settings is not set or set to 0, the feature is disabled. This feature also
-requires 'useraudit.login_attempts.LoginAttemptsBackend' backend.
+If the settings is not set or set to 0, the feature is disabled.
 
 The backend has a hook that allows to set up notification on exceeded number of allowed
-attempts and locked out account. This can be done by extending the backend and
-overriding 'notification' function:
+attempts and locked out account. This can be done by extending the
+`useraudit.backend.AuthFailedLoggerBackend` and overriding `notification` function:
 
 ```
     ...
@@ -157,8 +156,7 @@ Add `useraudit.backend.AuthFailedLoggerBackend` to
 AUTHENTICATION_BACKENDS = (
     'useraudit.password_expiry.AccountExpiryBackend',
     'django.contrib.auth.backends.ModelBackend',
-    'useraudit.backend.AuthFailedLoggerBackend',
-    'useraudit.login_attempts.LoginAttemptsBackend'
+    'useraudit.backend.AuthFailedLoggerBackend'
 )
 ```
 
