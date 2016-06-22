@@ -28,9 +28,9 @@ USER_MODEL = settings.AUTH_USER_MODEL
 def register_pre_save_on_AUTH_USER_MODER_change(sender, setting, value, enter, **kwargs):
     if setting == 'AUTH_USER_MODEL' and value != USER_MODEL:
         if enter:
-            pre_save.connect(useraudit.password_expiry.set_password_changed, sender=value)
+            pre_save.connect(useraudit.password_expiry.user_pre_save, sender=value)
         else:
-            pre_save.disconnect(useraudit.password_expiry.set_password_changed, sender=value)
+            pre_save.disconnect(useraudit.password_expiry.user_pre_save, sender=value)
 
 
 @override_settings(AUTH_USER_MODEL="useraudit_testapp.MyUser")
@@ -96,6 +96,19 @@ class ExpiryTestCase(TestCase):
         u = self.authenticate()
         self.assertIsNotNone(u)
         self.assertTrue(u.is_active)
+
+    @override_settings(ACCOUNT_EXPIRY_DAYS=5)
+    def test_expired_works_if_reactivated(self):
+        self.setuser(last_login=timezone.now() - timedelta(days=6))
+        u = self.authenticate()
+        # User is inactive now
+
+        # Reactivate user
+        self.user.is_active = True
+        self.user.save()
+        u = self.authenticate()
+        self.assertIsNotNone(u, "Should be able to log in again if it has been activated")
+        self.assertTrue(self.user2.is_active)
 
 
     ###########################################################################
