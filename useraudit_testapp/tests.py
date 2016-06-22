@@ -26,7 +26,7 @@ USER_MODEL = settings.AUTH_USER_MODEL
 # Also see doc for USER_MODEL above
 @receiver(setting_changed)
 def register_pre_save_on_AUTH_USER_MODER_change(sender, setting, value, enter, **kwargs):
-    if setting == 'AUTH_USER_MODEL' and value != USER_MODEL:
+    if setting == "AUTH_USER_MODEL" and value != USER_MODEL:
         if enter:
             pre_save.connect(useraudit.password_expiry.user_pre_save, sender=value)
         else:
@@ -98,7 +98,7 @@ class ExpiryTestCase(TestCase):
         self.assertTrue(u.is_active)
 
     @override_settings(ACCOUNT_EXPIRY_DAYS=5)
-    def test_expired_works_if_reactivated(self):
+    def test_authentication_works_if_reactivated(self):
         self.setuser(last_login=timezone.now() - timedelta(days=6))
         u = self.authenticate()
         # User is inactive now
@@ -117,7 +117,7 @@ class ExpiryTestCase(TestCase):
     def test_changing_of_password_updates_password_change_date_field(self):
         self.setuser(password_change_date=timezone.now() - timedelta(days=1))
         before_the_change = timezone.now()
-        self.user.set_password('the new password')
+        self.user.set_password("the new password")
         self.user.save()
         self.user.refresh_from_db()
         self.assertGreater(self.user.password_change_date, before_the_change)
@@ -127,7 +127,7 @@ class ExpiryTestCase(TestCase):
     def test_saving_same_password_does_not_update_password_change_date_field(self):
         one_day_ago = password_change_date=timezone.now() - timedelta(days=1)
         self.setuser(password_change_date=one_day_ago)
-        self.user.set_password('testuser') # same password
+        self.user.set_password("testuser") # same password
         self.user.save()
         self.user.refresh_from_db()
         self.assertEquals(one_day_ago, self.user.password_change_date, "Password change date shouldn't change")
@@ -232,7 +232,7 @@ class ProfileExpiryTestCase(TestCase):
         self.user.myprofile.password_change_date = timezone.now() - timedelta(days=1)
         self.user.myprofile.save()
         before_the_change = timezone.now()
-        self.user.set_password('the new password')
+        self.user.set_password("the new password")
         self.user.save()
         self.user.refresh_from_db()
         self.assertGreater(self.user.myprofile.password_change_date, before_the_change)
@@ -269,3 +269,73 @@ class ProfileExpiryTestCase(TestCase):
         u = self.authenticate()
         self.assertIsNone(u)
         self.assertTrue(self.user2.is_active)
+
+
+@override_settings(LOGIN_FAILURE_LIMIT=2)
+class FailedLoginAttemtpsTestCase(TestCase):
+    username = "testuser"
+    password = "testuser"
+
+    def setUp(self):
+        self.user = User.objects.create(
+            username=self.username,
+            email="testuser@localhost",
+        )
+        self.user.set_password(self.password)
+        self.user.save()
+
+    def tearDown(self):
+        self.user.delete()
+
+    @property
+    def user2(self):
+        self.user.refresh_from_db()
+        return self.user
+
+
+    def test_authenticate_works(self):
+        u = authenticate(username=self.username, password=self.password)
+        self.assertIsNotNone(u)
+        self.assertTrue(u.is_active)
+
+    @override_settings(LOGIN_FAILURE_LIMIT=None)
+    def test_login_failure_limit_not_enabled_None(self):
+        for i in range(10):
+            _ = authenticate(username=self.username, password="INCORRECT")
+        u = authenticate(username=self.username, password=self.password)
+        self.assertIsNotNone(u)
+        self.assertTrue(self.user2.is_active)
+
+    @override_settings(LOGIN_FAILURE_LIMIT=0)
+    def test_login_failure_limit_not_enabled_zero(self):
+        for i in range(10):
+            _ = authenticate(username=self.username, password="INCORRECT")
+        u = authenticate(username=self.username, password=self.password)
+        self.assertIsNotNone(u)
+        self.assertTrue(self.user2.is_active)
+
+    def test_login_failure_limit_reached(self):
+        _ = authenticate(username=self.username, password="INCORRECT")
+        _ = authenticate(username=self.username, password="INCORRECT")
+        u = authenticate(username=self.username, password=self.password)
+        self.assertIsNone(u)
+        self.assertFalse(self.user2.is_active)
+
+
+    def test_failure_counter_reset_when_reactivated(self):
+        _ = authenticate(username=self.username, password="INCORRECT")
+        _ = authenticate(username=self.username, password="INCORRECT")
+        _ = authenticate(username=self.username, password="INCORRECT")
+        # User is inactive now
+
+        # Reactivate user
+        self.user.is_active = True
+        self.user.save()
+
+        # IF the counter wasn't reset to 0, the first failed login attempt
+        # would inactivate the user again.
+        _ = authenticate(username=self.username, password="INCORRECT")
+        u = authenticate(username=self.username, password=self.password)
+        self.assertIsNotNone(u, "Should be able to log after just 1 failed login attempt")
+        self.assertTrue(self.user2.is_active)
+
