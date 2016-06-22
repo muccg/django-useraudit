@@ -102,15 +102,11 @@ from django.dispatch import receiver, Signal
 from django.utils import timezone
 import logging
 from .backend import AuthFailedLoggerBackend
+from .signals import password_has_expired, account_has_expired
 
 logger = logging.getLogger("django.security")
 
-__all__ = ["AccountExpiryBackend",
-           "password_has_expired", "account_has_expired"]
-
-password_has_expired = Signal(providing_args=["user"])
-account_has_expired = Signal(providing_args=["user"])
-
+__all__ = ["AccountExpiryBackend"]
 
 @receiver(pre_save, sender=settings.AUTH_USER_MODEL)
 def user_pre_save(sender, instance=None, raw=False, **kwargs):

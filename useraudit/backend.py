@@ -1,16 +1,15 @@
 import logging
-import abc
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.dispatch import receiver
+from django.dispatch import receiver, Signal
 from django.db.models.signals import pre_save
+from .signals import login_failure_limit_reached
 from .models import LoginLogger, LoginAttempt
 from .models import LoginAttemptLogger
 from .middleware import get_request
 
 logger = logging.getLogger("django.security")
-
 
 @receiver(pre_save, sender=settings.AUTH_USER_MODEL)
 def user_pre_save(sender, instance=None, raw=False, **kwargs):
@@ -48,7 +47,8 @@ class AuthFailedLoggerBackend(object):
         logger.debug("Login failure limit is enabled")
         if self.is_attempts_exceeded():
             self._deactivate_user()
-            self.notification()
+            user = self._get_user()
+            login_failure_limit_reached.send(sender=user.__class__, user=user)
             logger.info("Login Prevented for user '%s'! Maximum failed logins %d reached!",
                     self.username, self.login_failure_limit)
             raise PermissionDenied("Username '%s' has been blocked" % self.username)
@@ -85,8 +85,3 @@ class AuthFailedLoggerBackend(object):
             logger.warning("Username '%s' has been blocked" % self.username)
             return True
         return False
-
-    @abc.abstractmethod
-    def notification(self):
-        """Place for notification to user that the account has been blocked (Email, SMS etc.)"""
-        return

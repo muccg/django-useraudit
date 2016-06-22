@@ -14,6 +14,7 @@ import unittest
 
 from useraudit_testapp.models import MyUser, MyProfile
 import useraudit.password_expiry
+from useraudit.signals import login_failure_limit_reached, password_has_expired, account_has_expired
 
 # Saving a reference to the USER_MODEL set in the settings.py file
 # Our pre_save handler in password_expiry.py gets registered just for this sender
@@ -187,12 +188,12 @@ class ExpiryTestCase(TestCase):
         self.assertIsNone(user)
 
 
-@receiver(useraudit.password_expiry.password_has_expired)
+@receiver(password_has_expired)
 def handle_password_expired(**kwargs):
     ExpiryTestCase.password_expired_signal = kwargs
 
 
-@receiver(useraudit.password_expiry.account_has_expired)
+@receiver(account_has_expired)
 def handle_account_expired(**kwargs):
     ExpiryTestCase.account_expired_signal = kwargs
 
@@ -292,7 +293,6 @@ class FailedLoginAttemtpsTestCase(TestCase):
         self.user.refresh_from_db()
         return self.user
 
-
     def test_authenticate_works(self):
         u = authenticate(username=self.username, password=self.password)
         self.assertIsNotNone(u)
@@ -321,7 +321,6 @@ class FailedLoginAttemtpsTestCase(TestCase):
         self.assertIsNone(u)
         self.assertFalse(self.user2.is_active)
 
-
     def test_failure_counter_reset_when_reactivated(self):
         _ = authenticate(username=self.username, password="INCORRECT")
         _ = authenticate(username=self.username, password="INCORRECT")
@@ -338,4 +337,21 @@ class FailedLoginAttemtpsTestCase(TestCase):
         u = authenticate(username=self.username, password=self.password)
         self.assertIsNotNone(u, "Should be able to log after just 1 failed login attempt")
         self.assertTrue(self.user2.is_active)
+
+    def test_signal(self):
+        def handler(sender, user=None, **kwargs):
+            self.handler_called = True
+            self.assertEquals(sender, type(self.user))
+            self.assertEquals(user, self.user)
+        login_failure_limit_reached.connect(handler)
+
+        self.handler_called = False
+
+        _ = authenticate(username=self.username, password="INCORRECT")
+        _ = authenticate(username=self.username, password="INCORRECT")
+
+        login_failure_limit_reached.disconnect(handler)
+
+        self.assertTrue(self.handler_called)
+
 
