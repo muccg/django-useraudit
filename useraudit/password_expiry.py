@@ -102,27 +102,32 @@ from django.dispatch import receiver, Signal
 from django.utils import timezone
 import logging
 from .backend import AuthFailedLoggerBackend
+from .signals import password_has_expired, account_has_expired
 
 logger = logging.getLogger("django.security")
 
-__all__ = ["AccountExpiryBackend",
-           "password_has_expired", "account_has_expired"]
-
-password_has_expired = Signal(providing_args=["user"])
-account_has_expired = Signal(providing_args=["user"])
-
+__all__ = ["AccountExpiryBackend"]
 
 @receiver(pre_save, sender=settings.AUTH_USER_MODEL)
-def set_password_changed(sender, instance=None, raw=False, **kwargs):
+def user_pre_save(sender, instance=None, raw=False, **kwargs):
+    user = instance
     attrs = ExpirySettings.get()
     # We're saving the password change date only for existing users
     # Users just created should be taken care of by auto_now_add.
     # This way we can assume that a User profile object already exists
     # for the user. This is essential, because password change detection
     # can happen only in pre_save, in post_save it is too late.
-    is_existing_user = instance.pk is not None
-    if not raw and is_existing_user and attrs.date_changed:
-        update_date_changed(instance, attrs.date_changed)
+    is_new_user = user.pk is None
+    if is_new_user or raw:
+        return
+    if attrs.date_changed:
+        update_date_changed(user, attrs.date_changed)
+
+    # User has been re-activated. Ensure the last_login is set to None so
+    # that the user isn't inactivated on next login by the AccountExpiryBackend
+    current_user = sender.objects.get(pk=user.pk)
+    if not current_user.is_active and user.is_active:
+        user.last_login = None
 
 
 def update_date_changed(user, date_changed_attr):

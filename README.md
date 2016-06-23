@@ -46,17 +46,9 @@ user accounts.
 The setting `LOGIN_FAILURE_LIMIT` allows to enable a number of allowed login attempts.
 If the settings is not set or set to 0, the feature is disabled.
 
-The backend has a hook that allows to set up notification on exceeded number of allowed
-attempts and locked out account. This can be done by extending the
-`useraudit.backend.AuthFailedLoggerBackend` and overriding `notification` function:
-
-```
-    ...
-    def notification(self):
-        # Custom notification
-        return
-    ...
-```
+When the login failure limit is reached the user account will be deactivated.
+The `useraudit.signals.login_failure_limit_reached` signal is sent when this happens to allow
+for custom notification.
 
 ## Requirements
 
