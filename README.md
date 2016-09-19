@@ -188,6 +188,10 @@ In case this worries you, a cron job should be added that runs periodically to d
 
 The cron job should run the `disable_inactive_users` custom Django command.
 
+### Re-activate users
+
+The `activate_user` custom Django management command can be used to re-activate users that have been locked out from the system.
+
 ## Done
 
 Useraudit is set up to log all log in attempts for your project and expire user accounts.
