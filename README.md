@@ -1,6 +1,6 @@
 # Welcome
 
-[![Build Status](https://travis-ci.org/muccg/django-useraudit.svg)](https://travis-ci.org/muccg/django-useraudit)
+[![Build Status](https://travis-ci.org/muccg/django-useraudit.svg)](https://travis-ci.org/muccg/django-useraudit) [![PyPI](https://badge.fury.io/py/django-useraudit.svg)](https://pypi.python.org/pypi/django-useraudit)
 
 Django Useraudit is a small collection of user audit utilities containing:
 
