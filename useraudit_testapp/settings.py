@@ -8,6 +8,7 @@ INSTALLED_APPS = [
     "useraudit",
     "useraudit_testapp"
 ]
+ROOT_URLCONF = 'useraudit_testapp.urls'
 # AUTH_USER_MODEL = "useraudit.MyUser"
 AUTH_USER_MODEL_PASSWORD_CHANGE_DATE_ATTR = "password_change_date"
 PASSWORD_EXPIRY_DAYS = 10

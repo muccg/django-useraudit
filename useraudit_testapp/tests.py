@@ -13,6 +13,7 @@ import re
 import unittest
 
 from useraudit_testapp.models import MyUser, MyProfile
+import useraudit_testapp.urls
 import useraudit.password_expiry
 from useraudit.signals import login_failure_limit_reached, password_has_expired, account_has_expired
 
@@ -353,5 +354,3 @@ class FailedLoginAttemtpsTestCase(TestCase):
         login_failure_limit_reached.disconnect(handler)
 
         self.assertTrue(self.handler_called)
-
-
