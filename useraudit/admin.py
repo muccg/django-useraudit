@@ -25,7 +25,7 @@ class LoginAttemptAdmin(admin.ModelAdmin):
             user = UserModel._default_manager.get_by_natural_key(obj.username)
             if user.is_active:
                 return "Active"
-            activation_url = reverse("reactivate_user", args=[user.id,])
+            activation_url = reverse("useraudit:reactivate_user", args=[user.id,])
             return "<a href='%s'>Activate</a>" % activation_url
         except UserModel.DoesNotExist:
             return "N/A"
