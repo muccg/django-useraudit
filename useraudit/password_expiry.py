@@ -98,7 +98,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db.models.signals import pre_save
-from django.dispatch import receiver, Signal
+from django.dispatch import receiver
 from django.utils import timezone
 import logging
 from .backend import AuthFailedLoggerBackend
@@ -107,6 +107,7 @@ from .signals import password_has_expired, account_has_expired
 logger = logging.getLogger("django.security")
 
 __all__ = ["AccountExpiryBackend"]
+
 
 @receiver(pre_save, sender=settings.AUTH_USER_MODEL)
 def user_pre_save(sender, instance=None, raw=False, **kwargs):
@@ -195,7 +196,8 @@ def is_account_expired(user):
     return False
 
 
-class ExpirySettings(namedtuple("ExpirySettings", ["num_days", "num_warning_days", "date_changed", "password", "account_expiry"])):
+class ExpirySettings(namedtuple("ExpirySettings",
+                                ["num_days", "num_warning_days", "date_changed", "password", "account_expiry"])):
     @classmethod
     def get(cls):
         expiry = getattr(settings, "PASSWORD_EXPIRY_DAYS", None) or 0
@@ -237,7 +239,7 @@ class AccountExpiryBackend(object):
                 password_has_expired.send(sender=user.__class__, user=user)
                 self._prevent_login(username, "Password has expired")
 
-            if  is_account_expired(user):
+            if is_account_expired(user):
                 logger.info("Disabling stale user account: %s" % user)
                 user.is_active = False
                 user.save()

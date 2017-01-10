@@ -31,26 +31,29 @@ class Log(models.Model):
         ordering = ['-timestamp']
 
     username = models.CharField(max_length=255, null=True, blank=True)
-    ip_address = models.CharField(max_length=40, null=True, blank=True, verbose_name = "IP")
+    ip_address = models.CharField(max_length=40, null=True, blank=True, verbose_name="IP")
     forwarded_by = models.CharField(max_length=1000, null=True, blank=True)
     user_agent = models.CharField(max_length=255, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+
 class FailedLoginLog(Log):
     pass
 
+
 class LoginLog(Log):
     pass
+
 
 class LoginLogger(object):
 
     def log_failed_login(self, username, request):
         fields = self.extract_log_info(username, request)
-        log = FailedLoginLog.objects.create(**fields)
+        FailedLoginLog.objects.create(**fields)
 
     def log_login(self, username, request):
         fields = self.extract_log_info(username, request)
-        log = LoginLog.objects.create(**fields)
+        LoginLog.objects.create(**fields)
 
     def extract_log_info(self, username, request):
         if request:
@@ -84,13 +87,15 @@ class LoginLogger(object):
 
 login_logger = LoginLogger()
 login_attempt_logger = LoginAttemptLogger()
+
+
 def login_callback(sender, user, request, **kwargs):
     login_logger.log_login(user.get_username(), request)
     login_attempt_logger.reset(user.get_username())
 
+
 # User logged in Django signal
 user_logged_in.connect(login_callback)
-
 
 # Import password expiry module so that the signal is registered.
 # The password expiry feature won't be active unless the necessary
