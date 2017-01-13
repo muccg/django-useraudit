@@ -58,7 +58,7 @@ class LoginLogger(object):
     def extract_log_info(self, username, request):
         if request:
             ip_address, proxies = self.extract_ip_address(request)
-            user_agent = request.META.get('HTTP_USER_AGENT')
+            user_agent = request.META.get('HTTP_USER_AGENT')[:255]
         else:
             ip_address = None
             proxies = None
