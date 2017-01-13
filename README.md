@@ -37,7 +37,7 @@ The settings `ACCOUNT_EXPIRY_DAYS` and `PASSWORD_EXPIRY_DAYS` are provided for
 controling how frequently a user should log in and/or change their password before
 their account will be disabled.
 
-The user accounts are disabled on user login by default. 
+The user accounts are disabled on user login by default.
 You can also run the `disable_inactive_users` from a cron job to disable inactive
 user accounts.
 
@@ -55,8 +55,7 @@ for custom notification.
 Has been developed and tested on Django 1.9, but should work on other
 versions too.
 
-Django migrations and (South migrations for Django 1.7 and lower) are provided to make
-schema changes easier.
+Django migrations and are provided to make schema changes easier.
 
 ## Installation
 
@@ -141,7 +140,7 @@ MIDDLEWARE_CLASSES = (
 ```
 
 Add `useraudit.backend.AuthFailedLoggerBackend` to
-`settings.AUTHENTICATION_BACKENDS` **as the last element** and 
+`settings.AUTHENTICATION_BACKENDS` **as the last element** and
 `useraudit.password_expiry.AccountExpiryBackend` **as the first element**:
 
 ```

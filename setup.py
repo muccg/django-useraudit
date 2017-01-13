@@ -26,7 +26,6 @@ setup(
     packages=[
         'useraudit',
         'useraudit.migrations',
-        'useraudit.south_migrations',
     ],
     include_package_date=True,
 )
