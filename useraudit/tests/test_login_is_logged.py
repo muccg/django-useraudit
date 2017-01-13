@@ -29,6 +29,20 @@ class LoginIsLoggedTest(TestCase):
         self.assertEquals(log.ip_address, '192.168.1.1')
         self.assertEquals(log.user_agent, 'Test client')
 
+    def test_long_user_agent_is_truncated(self):
+        user_agent_field_length = m.LoginLog._meta.get_field('user_agent').max_length
+        long_user_agent = 'x' * (user_agent_field_length) + 'this should be truncated'
+
+        client = Client(REMOTE_ADDR='192.168.1.1', HTTP_USER_AGENT=long_user_agent)
+        client.post('/admin/login/', {
+                    'username': 'john',
+                    'password': 'sue',
+                    'this_is_the_login_form': 1,
+        })
+        log = m.LoginLog.objects.all()[0]
+        self.assertEquals(len(log.user_agent), user_agent_field_length)
+        self.assertTrue(long_user_agent.startswith(log.user_agent))
+
     def test_ip_forwarded_by_proxies(self):
         client = Client(REMOTE_ADDR='3.3.3.3',
                         HTTP_X_FORWARDED_FOR='192.168.1.1, 1.1.1.1, 2.2.2.2')

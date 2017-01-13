@@ -1,6 +1,10 @@
+import datetime
+import logging
 from django.db import models
 from django.contrib.auth.signals import user_logged_in
-import datetime
+
+
+logger = logging.getLogger('django.security')
 
 
 class LoginAttempt(models.Model):
@@ -56,6 +60,7 @@ class LoginLogger(object):
         LoginLog.objects.create(**fields)
 
     def extract_log_info(self, username, request):
+        USER_AGENT_MAX_LENGTH = Log._meta.get_field('user_agent').max_length
         if request:
             ip_address, proxies = self.extract_ip_address(request)
             user_agent = request.META.get('HTTP_USER_AGENT')
@@ -63,6 +68,11 @@ class LoginLogger(object):
             ip_address = None
             proxies = None
             user_agent = None
+
+        if user_agent is not None and len(user_agent) > USER_AGENT_MAX_LENGTH:
+            logger.warning('Truncating User Agent to fit into %d. Original was: "%s"',
+                           USER_AGENT_MAX_LENGTH, user_agent)
+            user_agent = user_agent[:USER_AGENT_MAX_LENGTH]
 
         return {
             'username': username,
