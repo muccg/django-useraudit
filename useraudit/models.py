@@ -1,6 +1,5 @@
 import datetime
 import logging
-from django.conf import settings
 from django.db import models
 from django.contrib.auth.signals import user_logged_in
 from .signals import password_has_expired, account_has_expired, login_failure_limit_reached
@@ -150,5 +149,3 @@ login_failure_limit_reached.connect(login_failure_limit_reached_callback)
 # The password expiry feature won't be active unless the necessary
 # settings are present.
 from . import password_expiry  # noqa
-
-
