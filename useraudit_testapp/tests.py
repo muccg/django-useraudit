@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.test import TestCase, override_settings
 from django.db.models.signals import pre_save
 from django.test.signals import setting_changed
+from django.test import Client
 from django.utils import timezone
 import re
 import unittest
@@ -16,6 +17,7 @@ from useraudit_testapp.models import MyUser, MyProfile
 import useraudit_testapp.urls
 import useraudit.password_expiry
 from useraudit.signals import login_failure_limit_reached, password_has_expired, account_has_expired
+from useraudit.models import UserDeactivation
 
 # Saving a reference to the USER_MODEL set in the settings.py file
 # Our pre_save handler in password_expiry.py gets registered just for this sender
@@ -85,6 +87,27 @@ class ExpiryTestCase(TestCase):
         self.assertIsNone(u)
         self.assertFalse(self.user2.is_active)
 
+    @override_settings(ACCOUNT_EXPIRY_DAYS=5)
+    def test_user_deactivation_saved_on_expiration(self):
+        self.setuser(last_login=timezone.now() - timedelta(days=6))
+        u = self.authenticate()
+        ud = UserDeactivation.objects.get(username=self.username)
+        self.assertIsNone(u)
+        self.assertIsNotNone(ud)
+        self.assertEquals(ud.reason, UserDeactivation.ACCOUNT_EXPIRED)
+
+    @override_settings(ACCOUNT_EXPIRY_DAYS=5)
+    def test_user_deactivation_deleted_on_login_success(self):
+        self.setuser(last_login=timezone.now() - timedelta(days=6))
+        self.authenticate()
+        count_before = UserDeactivation.objects.filter(username=self.username).count()
+        self.setuser(is_active=True)
+        c = Client()
+        c.login(username=self.username, password=self.password)
+        count_after = UserDeactivation.objects.filter(username=self.username).count()
+        self.assertEquals(count_before, 1)
+        self.assertEquals(count_after, 0)
+
     @override_settings(ACCOUNT_EXPIRY_DAYS=-5)
     def test_expiry_disabled(self):
         self.setuser(last_login=timezone.now() - timedelta(days=10000))
@@ -147,6 +170,15 @@ class ExpiryTestCase(TestCase):
         u = self.authenticate()
         self.assertIsNone(u)
         self.assertTrue(self.user2.is_active)
+
+    @override_settings(PASSWORD_EXPIRY_DAYS=5)
+    def test_user_deactivation_saved_on_password_expired(self):
+        self.setuser(password_change_date=timezone.now() - timedelta(days=6))
+        u = self.authenticate()
+        ud = UserDeactivation.objects.get(username=self.username)
+        self.assertIsNone(u)
+        self.assertIsNotNone(ud)
+        self.assertEquals(ud.reason, UserDeactivation.PASSWORD_EXPIRED)
 
     @override_settings(PASSWORD_EXPIRY_DAYS=-5)
     def test_password_expiry_disabled(self):
@@ -321,6 +353,15 @@ class FailedLoginAttemtpsTestCase(TestCase):
         u = authenticate(username=self.username, password=self.password)
         self.assertIsNone(u)
         self.assertFalse(self.user2.is_active)
+
+    def test_user_deactivation_saved_when_login_failure_limit_reached(self):
+        _ = authenticate(username=self.username, password="INCORRECT")
+        _ = authenticate(username=self.username, password="INCORRECT")
+        u = authenticate(username=self.username, password=self.password)
+        ud = UserDeactivation.objects.get(username=self.username)
+        self.assertIsNone(u)
+        self.assertIsNotNone(ud)
+        self.assertEquals(ud.reason, UserDeactivation.TOO_MANY_FAILED_LOGINS)
 
     def test_failure_counter_reset_when_reactivated(self):
         _ = authenticate(username=self.username, password="INCORRECT")
