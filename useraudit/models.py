@@ -2,6 +2,7 @@ import datetime
 import logging
 from django.db import models
 from django.contrib.auth.signals import user_logged_in
+from .signals import password_has_expired, account_has_expired, login_failure_limit_reached
 
 
 logger = logging.getLogger('django.security')
@@ -38,6 +39,22 @@ class Log(models.Model):
     ip_address = models.CharField(max_length=40, null=True, blank=True, verbose_name="IP")
     forwarded_by = models.CharField(max_length=1000, null=True, blank=True)
     user_agent = models.CharField(max_length=1000, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+class UserDeactivation(models.Model):
+    ACCOUNT_EXPIRED = 'AE'
+    PASSWORD_EXPIRED = 'PE'
+    TOO_MANY_FAILED_LOGINS = 'FL'
+
+    DEACTIVATION_REASON_CHOICES = (
+        (ACCOUNT_EXPIRED, 'Account expired'),
+        (PASSWORD_EXPIRED, 'Password expired'),
+        (TOO_MANY_FAILED_LOGINS, 'Too many failed login attemtps'),
+    )
+
+    username = models.CharField(max_length=255)
+    reason = models.CharField(max_length=2, blank=True, null=True, choices=DEACTIVATION_REASON_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
 
 
@@ -100,12 +117,33 @@ login_attempt_logger = LoginAttemptLogger()
 
 
 def login_callback(sender, user, request, **kwargs):
-    login_logger.log_login(user.get_username(), request)
-    login_attempt_logger.reset(user.get_username())
+    username = user.get_username()
+    login_logger.log_login(username, request)
+    login_attempt_logger.reset(username)
+    UserDeactivation.objects.filter(username=username).delete()
 
 
 # User logged in Django signal
 user_logged_in.connect(login_callback)
+
+
+def save_login_deactivation(reason):
+    def callback(sender, user, **kwargs):
+        username = user.get_username()
+        UserDeactivation.objects.filter(username=username).delete()
+        UserDeactivation.objects.create(username=username, reason=reason)
+    return callback
+
+
+password_expired_callback = save_login_deactivation(UserDeactivation.PASSWORD_EXPIRED)
+account_expired_callback = save_login_deactivation(UserDeactivation.ACCOUNT_EXPIRED)
+login_failure_limit_reached_callback = save_login_deactivation(UserDeactivation.TOO_MANY_FAILED_LOGINS)
+
+
+password_has_expired.connect(password_expired_callback)
+account_has_expired.connect(account_expired_callback)
+login_failure_limit_reached.connect(login_failure_limit_reached_callback)
+
 
 # Import password expiry module so that the signal is registered.
 # The password expiry feature won't be active unless the necessary
