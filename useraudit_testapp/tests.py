@@ -16,7 +16,7 @@ import unittest
 from useraudit_testapp.models import MyUser, MyProfile
 import useraudit_testapp.urls
 import useraudit.password_expiry
-from useraudit.signals import login_failure_limit_reached, password_has_expired, account_has_expired
+from useraudit.signals import login_failure_limit_reached, password_has_expired, account_has_expired, password_will_expire_warning
 from useraudit.models import UserDeactivation
 
 # Saving a reference to the USER_MODEL set in the settings.py file
@@ -53,6 +53,7 @@ class ExpiryTestCase(TestCase):
         self.user.save()
 
         type(self).password_expired_signal = None
+        type(self).password_will_expire_warning_signal = None
         type(self).account_expired_signal = None
 
     def tearDown(self):
@@ -164,6 +165,45 @@ class ExpiryTestCase(TestCase):
         self.assertIsNotNone(u)
         self.assertTrue(u.is_active)
 
+    @override_settings(PASSWORD_EXPIRY_DAYS=1, PASSWORD_EXPIRY_WARNING_DAYS=1)
+    def test_no_warning_if_password_already_expired(self):
+        self.setuser(password_change_date=timezone.now() - timedelta(days=2))
+        u = self.authenticate()
+        self.assertIsNone(self.password_will_expire_warning_signal)
+
+    @override_settings(PASSWORD_EXPIRY_DAYS=1, PASSWORD_EXPIRY_WARNING_DAYS=1)
+    def test_password_needs_to_be_changed_today(self):
+        u = self.authenticate()
+        self.assertTrue(self.user2.is_active)
+        self.assertIsNotNone(self.password_will_expire_warning_signal)
+        self.assertEquals(self.password_will_expire_warning_signal["sender"], type(self.user))
+        self.assertEquals(self.password_will_expire_warning_signal["user"], self.user)
+        self.assertEquals(self.password_will_expire_warning_signal["days_left"], 0)
+
+    @override_settings(PASSWORD_EXPIRY_DAYS=1, PASSWORD_EXPIRY_WARNING_DAYS=None)
+    def test_no_warning_if_disabled(self):
+        u = self.authenticate()
+        self.assertIsNone(self.password_will_expire_warning_signal)
+
+    @override_settings(PASSWORD_EXPIRY_DAYS=10, PASSWORD_EXPIRY_WARNING_DAYS=5)
+    def test_no_warning_if_warning_days_is_not_big_enough(self):
+        # Password is good for 6 more days
+        self.setuser(password_change_date=timezone.now() - timedelta(days=3))
+        u = self.authenticate()
+        self.assertIsNone(self.password_will_expire_warning_signal)
+
+    @override_settings(PASSWORD_EXPIRY_DAYS=10, PASSWORD_EXPIRY_WARNING_DAYS=5)
+    def test_warning_as_soon_as_warning_days_is_reached(self):
+        # Password is good for 5 more days
+        self.setuser(password_change_date=timezone.now() - timedelta(days=4))
+        u = self.authenticate()
+        self.assertTrue(self.user2.is_active)
+        self.assertIsNotNone(self.password_will_expire_warning_signal)
+        self.assertEquals(self.password_will_expire_warning_signal["sender"], type(self.user))
+        self.assertEquals(self.password_will_expire_warning_signal["user"], self.user)
+        self.assertEquals(self.password_will_expire_warning_signal["days_left"], 5)
+
+
     @override_settings(PASSWORD_EXPIRY_DAYS=5)
     def test_password_expired(self):
         self.setuser(password_change_date=timezone.now() - timedelta(days=6))
@@ -224,6 +264,11 @@ class ExpiryTestCase(TestCase):
 @receiver(password_has_expired)
 def handle_password_expired(**kwargs):
     ExpiryTestCase.password_expired_signal = kwargs
+
+
+@receiver(password_will_expire_warning)
+def handle_password_will_expire_warning(**kwargs):
+    ExpiryTestCase.password_will_expire_warning_signal = kwargs
 
 
 @receiver(account_has_expired)
