@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils import datetime
+from django.utils import timezone
 from django.contrib.auth.signals import user_logged_in
 import datetime
 
