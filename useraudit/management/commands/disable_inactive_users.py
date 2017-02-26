@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.contrib.sites.shortcuts import get_current_site
-from ...password_expiry import ExpirySettings, logger
+from ...password_expiry import ExpirySettings
 
 
 class Command(BaseCommand):
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         to_email = getattr(user, "email", None)
         msg = """Dear {full_name},
 
-This is an automatic message from the {name} system.
+This is an automatic message from the {site_name} system.
 
 If accounts are not used for a period of {expiry_days} days, they will
 be deactivated. The last time your user logged in was {last_login}.
@@ -67,8 +67,9 @@ message. We wish you well for all your future endeavours.
 Otherwise, please get in contact with the site administrators to have
 your account reset.
 
-{name} System
-        """.format(name=site.name, expiry_days=exp.account_expiry,
+{site_name} System
+        """.format(site_name=site.name,
+                   expiry_days=exp.account_expiry,
                    last_login=user.last_login.strftime("%x"),
                    full_name=user.get_full_name())
 

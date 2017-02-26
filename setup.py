@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='django-useraudit',
-    version='1.3.3',
+    version='1.5.1',
     description='Django user audit utilities like logging user log in, disabling access when password expires or user is inactive',
     long_description='Django user audit utilities like logging user log in, disabling access when password expires or user is inactive',
     author='CCG, Murdoch University',
@@ -26,7 +26,6 @@ setup(
     packages=[
         'useraudit',
         'useraudit.migrations',
-        'useraudit.south_migrations',
     ],
     include_package_date=True,
 )

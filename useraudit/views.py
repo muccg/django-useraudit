@@ -1,3 +1,5 @@
+import logging
+
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
@@ -5,7 +7,11 @@ from django.contrib.auth import get_user_model
 from .models import LoginAttemptLogger
 from . import middleware
 
+
+logger = logging.getLogger("django.security")
+
 login_attempt_logger = LoginAttemptLogger()
+
 
 def test_request_available(request):
     thread_request = middleware.get_request()

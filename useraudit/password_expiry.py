@@ -98,15 +98,16 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db.models.signals import pre_save
-from django.dispatch import receiver, Signal
+from django.dispatch import receiver
 from django.utils import timezone
 import logging
 from .backend import AuthFailedLoggerBackend
-from .signals import password_has_expired, account_has_expired
+from .signals import password_has_expired, password_will_expire_warning, account_has_expired
 
 logger = logging.getLogger("django.security")
 
 __all__ = ["AccountExpiryBackend"]
+
 
 @receiver(pre_save, sender=settings.AUTH_USER_MODEL)
 def user_pre_save(sender, instance=None, raw=False, **kwargs):
@@ -153,12 +154,23 @@ def update_date_changed(user, date_changed_attr):
             set_password_change_date(user, now)
 
 
-def is_password_expired(user):
+def should_warn_about_password_expiry(user):
+    warn_in_days = ExpirySettings.get().num_warning_days or 0
+    days_left = days_to_password_expiry(user) or 0
+    return warn_in_days > 0 and days_left <= warn_in_days
+
+
+def days_to_password_expiry(user):
     earliest = ExpirySettings.get().earliest_possible_password_change
     if earliest:
         change_date = get_password_change_date(user)
-        return change_date and change_date < earliest
-    return False
+        if change_date:
+            return (change_date - earliest).days
+
+
+def is_password_expired(user):
+    days = days_to_password_expiry(user)
+    return days is not None and days < 0
 
 
 def get_password_change_date(user):
@@ -175,8 +187,6 @@ def get_password_change_date(user):
             return val
         else:
             logger.warning("Password change attr in settings is not a string")
-
-    return None
 
 
 def get_user_last_login(user):
@@ -195,7 +205,8 @@ def is_account_expired(user):
     return False
 
 
-class ExpirySettings(namedtuple("ExpirySettings", ["num_days", "num_warning_days", "date_changed", "password", "account_expiry"])):
+class ExpirySettings(namedtuple("ExpirySettings",
+                                ["num_days", "num_warning_days", "date_changed", "password", "account_expiry"])):
     @classmethod
     def get(cls):
         expiry = getattr(settings, "PASSWORD_EXPIRY_DAYS", None) or 0
@@ -237,12 +248,17 @@ class AccountExpiryBackend(object):
                 password_has_expired.send(sender=user.__class__, user=user)
                 self._prevent_login(username, "Password has expired")
 
-            if  is_account_expired(user):
+            if is_account_expired(user):
                 logger.info("Disabling stale user account: %s" % user)
                 user.is_active = False
                 user.save()
                 account_has_expired.send(sender=user.__class__, user=user)
                 self._prevent_login(username, "Account has expired")
+
+            if should_warn_about_password_expiry(user):
+                days_left = days_to_password_expiry(user)
+                logger.info("User's '%s' password will expire in %d days", user, days_left)
+                password_will_expire_warning.send(sender=user.__class__, user=user, days_left=days_left)
 
         # pass on to next handler
         return None

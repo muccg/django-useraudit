@@ -1,7 +1,5 @@
 # Django test settings for django useraudit project.
 
-from os import path
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -13,12 +11,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'db.sqlite3',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'db.sqlite3',                    # Or path to database file if using sqlite3.
+        'USER': '',                              # Not used with sqlite3.
+        'PASSWORD': '',                          # Not used with sqlite3.
+        'HOST': '',                              # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                              # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -76,7 +74,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -117,7 +114,7 @@ AUTHENTICATION_BACKENDS = (
 ROOT_URLCONF = 'useraudit.test_urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-#WSGI_APPLICATION = 'django_useraudit.wsgi.application'
+# WSGI_APPLICATION = 'django_useraudit.wsgi.application'
 
 INSTALLED_APPS = (
     'django.contrib.auth',

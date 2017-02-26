@@ -8,6 +8,7 @@ except ImportError:
 
 thread_data = threading.local()
 
+
 def get_request():
     return getattr(thread_data, 'request', None)
 
