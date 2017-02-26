@@ -1,5 +1,10 @@
 import threading
-from django.utils.deprecation import MiddlewareMixin
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    class MiddlewareMixin(object):
+        def __init__(self, *args, **kwargs):
+            pass
 
 thread_data = threading.local()
 
