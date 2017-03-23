@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('useraudit', '0006_add_userdeactivation_table_unicode_fixup.py'),
+        ('useraudit', '0006_add_userdeactivation_table_unicode_fixup'),
     ]
 
     operations = [
