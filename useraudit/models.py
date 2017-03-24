@@ -51,7 +51,7 @@ class UserDeactivation(models.Model):
     DEACTIVATION_REASON_CHOICES = (
         (ACCOUNT_EXPIRED, 'Account expired'),
         (PASSWORD_EXPIRED, 'Password expired'),
-        (TOO_MANY_FAILED_LOGINS, 'Too many failed login attemtps'),
+        (TOO_MANY_FAILED_LOGINS, 'Too many failed login attempts'),
     )
 
     username = models.CharField(max_length=255)
