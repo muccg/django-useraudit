@@ -83,6 +83,14 @@ You will run `migrate` to create/migrate the useraudit DB tables. Ex:
 ```
 $ ./manage.py migrate useraudit
 ```
+Then add useraudit to your project url for the activate link to work in django admin.
+
+```
+...
+url(r'^useraudit/', include('useraudit.urls')),
+...
+```
+
 
 ### Model changes for password expiration
 
