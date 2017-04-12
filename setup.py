@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='django-useraudit',
-    version='1.5.3',
+    version='1.5.4',
     description='Django user audit utilities like logging user log in, disabling access when password expires or user is inactive',
     long_description='Django user audit utilities like logging user log in, disabling access when password expires or user is inactive',
     author='CCG, Murdoch University',
