@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core import management
+from django.core.handlers.base import BaseHandler
 from django.dispatch import receiver
 from django.test import TestCase, override_settings
 from django.db.models.signals import pre_save
@@ -440,3 +441,16 @@ class FailedLoginAttemtpsTestCase(TestCase):
         login_failure_limit_reached.disconnect(handler)
 
         self.assertTrue(self.handler_called)
+
+
+class MiddlewareTestCase(TestCase):
+
+    @override_settings(MIDDLEWARE_CLASSES=['useraudit.middleware.RequestToThreadLocalMiddleware'])
+    def test_middleware_loads_on_PRE_django_1_10s_old_style_middleware(self):
+        handler = BaseHandler()
+        handler.load_middleware()
+
+    @override_settings(MIDDLEWARE=['useraudit.middleware.RequestToThreadLocalMiddleware'])
+    def test_middleware_loads_on_django_1_10s_new_style_middleware(self):
+        handler = BaseHandler()
+        handler.load_middleware()
