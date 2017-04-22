@@ -81,7 +81,7 @@ class LoginLogger(object):
         USER_AGENT_MAX_LENGTH = Log._meta.get_field('user_agent').max_length
         if request:
             ip_address, proxies = self.extract_ip_address(request)
-            user_agent = request.META.get('HTTP_USER_AGENT')
+            user_agent = request.META.get('HTTP_USER_AGENT')[:255]
         else:
             ip_address = None
             proxies = None
