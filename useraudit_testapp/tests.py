@@ -409,12 +409,20 @@ class FailedLoginAttemtpsTestCase(TestCase):
         self.assertIsNotNone(ud)
         self.assertEquals(ud.reason, UserDeactivation.TOO_MANY_FAILED_LOGINS)
 
+    def test_user_deactivation_NOT_saved_when_login_failure_limit_reached_but_username_does_NOT_exist(self):
+        username = 'doesnotexit'
+        _ = authenticate(username=username, password="INCORRECT")
+        _ = authenticate(username=username, password="INCORRECT")
+        u = authenticate(username=username, password=self.password)
+        uds = UserDeactivation.objects.filter(username=username).count()
+        self.assertIsNone(u)
+        self.assertEquals(uds, 0)
+
     def test_failure_counter_reset_when_reactivated(self):
         _ = authenticate(username=self.username, password="INCORRECT")
         _ = authenticate(username=self.username, password="INCORRECT")
         _ = authenticate(username=self.username, password="INCORRECT")
         # User is inactive now
-
         # Reactivate user
         self.user.is_active = True
         self.user.save()

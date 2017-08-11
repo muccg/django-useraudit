@@ -38,15 +38,15 @@ class AuthFailedLoggerBackend(object):
         UserModel = get_user_model()
         self.username = credentials.get(UserModel.USERNAME_FIELD)
         self.login_logger.log_failed_login(self.username, get_request())
-        self.login_attempt_logger.increment(self.username)
-        self.block_user_if_needed()
+        if self._get_user() is not None:
+            self.login_attempt_logger.increment(self.username)
+            self.block_user_if_needed()
 
         return None
 
     def block_user_if_needed(self):
         if not self.is_login_failure_limit_enabled():
             return
-        logger.debug("Login failure limit is enabled")
         if self.is_attempts_exceeded():
             self._deactivate_user()
             user = self._get_user()
