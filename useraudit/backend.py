@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
+from django.views.decorators.debug import sensitive_variables
+
 from .signals import login_failure_limit_reached
 from .models import LoginLogger, LoginAttempt
 from .models import LoginAttemptLogger
@@ -34,6 +36,7 @@ class AuthFailedLoggerBackend(object):
         self.login_failure_limit = getattr(settings, 'LOGIN_FAILURE_LIMIT', None) or 0
         self.login_attempt_logger = LoginAttemptLogger()
 
+    @sensitive_variables('credentials')
     def authenticate(self, **credentials):
         UserModel = get_user_model()
         self.username = credentials.get(UserModel.USERNAME_FIELD)
