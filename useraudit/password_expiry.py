@@ -245,6 +245,9 @@ class AccountExpiryBackend(object):
                 self._prevent_login(username, "Account is not active")
 
             if is_password_expired(user):
+                logger.info("Password expired! Disabling user account: %s" % user)
+                user.is_active = False
+                user.save()
                 password_has_expired.send(sender=user.__class__, user=user)
                 self._prevent_login(username, "Password has expired")
 

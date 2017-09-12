@@ -210,7 +210,7 @@ class ExpiryTestCase(TestCase):
         self.setuser(password_change_date=timezone.now() - timedelta(days=6))
         u = self.authenticate()
         self.assertIsNone(u)
-        self.assertTrue(self.user2.is_active)
+        self.assertFalse(self.user2.is_active)
 
     @override_settings(PASSWORD_EXPIRY_DAYS=5)
     def test_user_deactivation_saved_on_password_expired(self):
@@ -219,6 +219,7 @@ class ExpiryTestCase(TestCase):
         ud = UserDeactivation.objects.get(username=self.username)
         self.assertIsNone(u)
         self.assertIsNotNone(ud)
+        self.assertFalse(self.user2.is_active)
         self.assertEquals(ud.reason, UserDeactivation.PASSWORD_EXPIRED)
 
     @override_settings(PASSWORD_EXPIRY_DAYS=-5)
@@ -329,7 +330,7 @@ class ProfileExpiryTestCase(TestCase):
         self.user.myprofile.save()
         u = self.authenticate()
         self.assertIsNone(u)
-        self.assertTrue(self.user2.is_active)
+        self.assertFalse(self.user2.is_active)
 
     @override_settings(
         AUTH_USER_MODEL_PASSWORD_CHANGE_DATE_ATTR="myprofile.asdfgh",
@@ -348,7 +349,7 @@ class ProfileExpiryTestCase(TestCase):
         self.user.myprofile.save()
         u = self.authenticate()
         self.assertIsNone(u)
-        self.assertTrue(self.user2.is_active)
+        self.assertFalse(self.user2.is_active)
 
 
 @override_settings(LOGIN_FAILURE_LIMIT=2)
