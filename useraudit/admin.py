@@ -1,4 +1,9 @@
-from django.core.urlresolvers import reverse
+
+try:
+    from django.core.urlresolvers import reverse
+except ImportError:
+    from django.urls import reverse
+
 from django.contrib.auth import get_user_model
 from django.contrib import admin
 from useraudit import models as m
