@@ -1,20 +1,24 @@
 sudo: false
 language: python
 python:
+  - "2.7"
+  - "3.4"
   - "3.5"
+  - "3.6"
+  - "3.7"
 env:
   global:
     - RUNTEST_ARGS="-v --noinput"
-  matrix:
-    # Quality checks
-    - TOXENV=flake8
-    # Supported python/django versions
-    - TOXENV=py27-django-18
-    - TOXENV=py27-django-19
-    - TOXENV=py27-django-110
-    - TOXENV=py35-django-18
-    - TOXENV=py35-django-19
-    - TOXENV=py35-django-110
+      #  matrix:
+      #    # Quality checks
+      #    - TOXENV=flake8
+      #    # Supported python/django versions
+      #    - TOXENV=py27-django-18
+      #    - TOXENV=py27-django-19
+      #    - TOXENV=py27-django-110
+      #    - TOXENV=py35-django-18
+      #    - TOXENV=py35-django-19
+      #    - TOXENV=py35-django-110
 install:
-  - pip install tox
+  - pip install tox-travis
 script: tox
