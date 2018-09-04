@@ -1,8 +1,8 @@
 import logging
 
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from .models import LoginAttemptLogger
 from . import middleware
@@ -21,6 +21,8 @@ def test_request_available(request):
 
 
 def reactivate_user(request, user_id):
+    assert False, reverse("admin:useraudit_loginattempt_changelist")
+
     user = _get_user(user_id)
     user.is_active = True
     user.save()

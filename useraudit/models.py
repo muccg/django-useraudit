@@ -42,6 +42,9 @@ class Log(models.Model):
     user_agent = models.CharField(max_length=1000, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return '%s|%s|%s|%s|%s' % (self.username, self.ip_address, self.forwarded_by, self.user_agent, self.timestamp)
+
 
 class UserDeactivation(models.Model):
     ACCOUNT_EXPIRED = 'AE'

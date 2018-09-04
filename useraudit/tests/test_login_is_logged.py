@@ -1,26 +1,26 @@
-from django.test import TestCase
-from django.test.client import Client
 from django.contrib.auth.models import User
+from django.test import TestCase
 
-from useraudit import models as m
-from useraudit.tests.utils import is_recent
+from .. import models as m
+from .utils import chain_maps, is_recent, simulate_login
 
-from datetime import datetime, timedelta
 
 class LoginIsLoggedTest(TestCase):
+    CORRECT_CREDENTIALS = {'username': 'john', 'password': 'sue'}
+    DEFAULT_HEADERS = {'REMOTE_ADDR': '192.168.1.1', 'HTTP_USER_AGENT': 'Test client'}
 
     def setUp(self):
-        user = User.objects.create_user(username='john', password='sue')
+        user = User.objects.create_user(**self.CORRECT_CREDENTIALS)
         user.is_staff = True
         user.save()
 
+    def login(self, **headers):
+        all_headers = self.DEFAULT_HEADERS if not headers else chain_maps(headers, self.DEFAULT_HEADERS)
+        simulate_login(headers=all_headers, **self.CORRECT_CREDENTIALS)
+
     def test_login_is_logged(self):
-        client = Client(REMOTE_ADDR='192.168.1.1', HTTP_USER_AGENT='Test client')
-        client.post('/admin/login/', {
-                    'username': 'john',
-                    'password': 'sue',
-                    'this_is_the_login_form': 1,
-        })
+        self.login()
+
         self.assertEquals(m.FailedLoginLog.objects.count(), 0)
         self.assertEquals(m.LoginLog.objects.count(), 1)
         log = m.LoginLog.objects.all()[0]
@@ -33,24 +33,17 @@ class LoginIsLoggedTest(TestCase):
         user_agent_field_length = m.LoginLog._meta.get_field('user_agent').max_length
         long_user_agent = 'x' * (user_agent_field_length) + 'this should be truncated'
 
-        client = Client(REMOTE_ADDR='192.168.1.1', HTTP_USER_AGENT=long_user_agent)
-        client.post('/admin/login/', {
-                    'username': 'john',
-                    'password': 'sue',
-                    'this_is_the_login_form': 1,
-        })
+        self.login(HTTP_USER_AGENT=long_user_agent)
+
         log = m.LoginLog.objects.all()[0]
         self.assertEquals(len(log.user_agent), user_agent_field_length)
         self.assertTrue(long_user_agent.startswith(log.user_agent))
 
     def test_ip_forwarded_by_proxies(self):
-        client = Client(REMOTE_ADDR='3.3.3.3',
-                        HTTP_X_FORWARDED_FOR='192.168.1.1, 1.1.1.1, 2.2.2.2')
-        client.post('/admin/login/', {
-                    'username': 'john',
-                    'password': 'sue',
-                    'this_is_the_login_form': 1,
-        })
+        self.login(
+                REMOTE_ADDR='3.3.3.3',
+                HTTP_X_FORWARDED_FOR='192.168.1.1, 1.1.1.1, 2.2.2.2')
+
         log = m.LoginLog.objects.first()
         self.assertIsNotNone(log)
         self.assertEquals(log.ip_address, '192.168.1.1')

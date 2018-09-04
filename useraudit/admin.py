@@ -1,6 +1,7 @@
-from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.contrib import admin
+from django.urls import reverse
+
 from useraudit import models as m
 
 

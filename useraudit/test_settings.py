@@ -1,7 +1,6 @@
 # Django test settings for django useraudit project.
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -95,7 +94,7 @@ TEMPLATES = [{
     },
 }]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'useraudit.middleware.RequestToThreadLocalMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

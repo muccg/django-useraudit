@@ -234,7 +234,7 @@ class AccountExpiryBackend(object):
     This backend doesn't authenticate, it just prevents authentication
     of a user whose account password has expired.
     """
-    def authenticate(self, username=None, password=None, **kwargs):
+    def authenticate(self, request=None, username=None, password=None, **kwargs):
         user = self._lookup_user(username, password, **kwargs)
 
         if user:

@@ -37,10 +37,14 @@ class AuthFailedLoggerBackend(object):
         self.login_attempt_logger = LoginAttemptLogger()
 
     @sensitive_variables('credentials')
-    def authenticate(self, **credentials):
+    def authenticate(self, request=None, **credentials):
+        if request is None:
+            # TODO remove this when we don't support Django 1.10 anymore
+            # request is passed to authenticate starting with Django 1.11
+            request = get_request()
         UserModel = get_user_model()
         self.username = credentials.get(UserModel.USERNAME_FIELD)
-        self.login_logger.log_failed_login(self.username, get_request())
+        self.login_logger.log_failed_login(self.username, request)
         if self._get_user() is not None:
             self.login_attempt_logger.increment(self.username)
             self.block_user_if_needed()
