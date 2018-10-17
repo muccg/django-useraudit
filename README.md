@@ -25,7 +25,7 @@ Both logs contain the same information:
 * User Agent - the user agent as received by the client
 * Timestamp - timestamp of the login request
 
-The //Forwarded by// field can be important, because if you don't trust all the proxies
+The *Forwarded by* field can be important, because if you don't trust all the proxies
 in the list, then you can't rely on the IP Address being correct.
 The proxies are listed from closest (to the server) to furthermost.
 
