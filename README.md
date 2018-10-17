@@ -19,17 +19,15 @@ There are two log tables one for successful and one for failed logins.
 
 Both logs contain the same information:
 
-* Username
-* IP address
-* Forwarded by
-* User Agent
-* Timestamp
+* Username - the Django user's name who tried to log in
+* IP address - the client IP address of the browser (or other HTTP client)
+* Forwarded by - list of proxies between the client and the server
+* User Agent - the user agent as received by the client
+* Timestamp - timestamp of the login request
 
-Forwarded by is a comma-separated list of proxies that forwarded the
-request for you. The proxies are listed from closest to furthermost.
-
-This field is important, because if you don't trust all the proxies in
-the list, then you can't rely on the IP Address being correct.
+The *Forwarded by* field can be important, because if you don't trust all the proxies
+in the list, then you can't rely on the IP Address being correct.
+The proxies are listed from closest (to the server) to furthermost.
 
 ### User and password expiry
 
@@ -37,13 +35,13 @@ The settings `ACCOUNT_EXPIRY_DAYS` and `PASSWORD_EXPIRY_DAYS` are provided for
 controling how frequently a user should log in and/or change their password before
 their account will be disabled.
 
-The user accounts are disabled on user login by default.
-You can also run the `disable_inactive_users` from a cron job to disable inactive
-user accounts.
+By default, the user account is disabled at the time the user tries to log in.
+
+If you would like to disable inactive accounts as they expire you should consider running the `disable_inactive_users` custom django management command from a cron job.
 
 ### Login attempts limit
 
-The setting `LOGIN_FAILURE_LIMIT` allows to enable a number of allowed login attempts.
+The setting `LOGIN_FAILURE_LIMIT` allows to enable a number of allowed failed login attempts.
 If the settings is not set or set to 0, the feature is disabled.
 
 When the login failure limit is reached the user account will be deactivated.
@@ -54,8 +52,6 @@ for custom notification.
 
 Has been developed and tested on Django 1.9, but should work on other
 versions too.
-
-Django migrations and are provided to make schema changes easier.
 
 ## Installation
 
@@ -90,11 +86,11 @@ For password expiration to work we have to save the last time the users changed 
 Therefore a datetime field is needed that is associated with the User.
 However, Django allows two possible ways for you to extend your User model, Django custom auth
 models or a "user profile" model that is associated with a OneToOne field to the auth User model.
-Django Useraudit can't possibly know which methods (if any) your project is using therefore it can't
+Django Useraudit can't possibly know which method (if any) your project is using therefore it can't
 create this field and the migration for it automatically.
 You will have to create the field and your migration manually as follows.
 
-The filed definition in both cases should be a `DateTimeField` with `auto_add_now`, and `null` set to `True`.
+The field definition in both cases should be a `DateTimeField` with `auto_add_now`, and `null` set to `True`.
 The recommended name is `password_change_date`, but that is customisable.
 Ex:
 
@@ -195,14 +191,9 @@ The `activate_user` custom Django management command can be used to re-activate 
 
 Useraudit is set up to log all log in attempts for your project and expire user accounts.
 
-In case you would like to know the technical details please go to the
-[how it works](https://github.com/muccg/django-useraudit/wiki/How-it-works)
-page.
+In case you would like to know the technical details please see
+[how it works](https://github.com/muccg/django-useraudit/wiki/How-it-works).
 
-For developer specific information you probably also want to read the
-[development](https://github.com/muccg/django-useraudit/wiki/Development)
-page.
+For developer specific information please see
+[development](https://github.com/muccg/django-useraudit/wiki/Development).
 
-New releases will be announced on the
-[releases](https://github.com/muccg/django-useraudit/wiki/Releases)
-page.
