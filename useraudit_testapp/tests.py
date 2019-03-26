@@ -18,7 +18,7 @@ from useraudit_testapp.models import MyUser, MyProfile
 import useraudit_testapp.urls
 import useraudit.password_expiry
 from useraudit.signals import login_failure_limit_reached, password_has_expired, account_has_expired, password_will_expire_warning
-from useraudit.models import UserDeactivation
+from useraudit.models import UserDeactivation, LoginAttempt
 
 # Saving a reference to the USER_MODEL set in the settings.py file
 # Our pre_save handler in password_expiry.py gets registered just for this sender
@@ -450,6 +450,39 @@ class FailedLoginAttemtpsTestCase(TestCase):
         login_failure_limit_reached.disconnect(handler)
 
         self.assertTrue(self.handler_called)
+
+class LoginAttemtpsTimestampTestCase(TestCase):
+    username = "testuser"
+    password = "testuser"
+
+    def setUp(self):
+        self.user = User.objects.create(
+            username=self.username,
+            email="testuser@localhost",
+        )
+        self.user.set_password(self.password)
+        self.user.save()
+
+    def tearDown(self):
+        self.user.delete()
+
+    @override_settings(USE_TZ=False)
+    def test_timestamp_naive(self):
+        _ = authenticate(username=self.username, password="INCORRECT")
+        _ = authenticate(username=self.username, password="INCORRECT")
+        login_attempt = LoginAttempt.objects.get(username=self.username)
+
+        is_naive = login_attempt.timestamp.tzinfo is None or login_attempt.tzinfo.utcoffset(login_attempt) is None 
+        self.assertTrue(is_naive)
+
+    @override_settings(USE_TZ=True)
+    def test_timestamp_aware(self):
+        _ = authenticate(username=self.username, password="INCORRECT")
+        _ = authenticate(username=self.username, password="INCORRECT")
+        login_attempt = LoginAttempt.objects.get(username=self.username)
+
+        is_aware = login_attempt.timestamp.tzinfo is not None or login_attempt.tzinfo.utcoffset(login_attempt) is not None
+        self.assertTrue(is_aware)
 
 
 class MiddlewareTestCase(TestCase):
