@@ -472,7 +472,8 @@ class LoginAttemtpsTimestampTestCase(TestCase):
         _ = authenticate(username=self.username, password="INCORRECT")
         login_attempt = LoginAttempt.objects.get(username=self.username)
 
-        is_naive = login_attempt.timestamp.tzinfo is None or login_attempt.tzinfo.utcoffset(login_attempt) is None 
+        timestamp = login_attempt.timestamp
+        is_naive = timestamp.tzinfo is None or timestamp.tzinfo.utcoffset(timestamp) is None 
         self.assertTrue(is_naive)
 
     @override_settings(USE_TZ=True)
@@ -481,7 +482,8 @@ class LoginAttemtpsTimestampTestCase(TestCase):
         _ = authenticate(username=self.username, password="INCORRECT")
         login_attempt = LoginAttempt.objects.get(username=self.username)
 
-        is_aware = login_attempt.timestamp.tzinfo is not None or login_attempt.tzinfo.utcoffset(login_attempt) is not None
+        timestamp = login_attempt.timestamp
+        is_aware = timestamp.tzinfo is not None and timestamp.tzinfo.utcoffset(timestamp) is not None
         self.assertTrue(is_aware)
 
 
