@@ -22,22 +22,15 @@ class LoginAttemptLogger(object):
     def reset(self, username):
         defaults = {
             'count': 0,
-            'timestamp': self.generate_timestamp()
+            'timestamp': timezone.now()
         }
         LoginAttempt.objects.update_or_create(username=username, defaults=defaults)
 
     def increment(self, username):
         obj, created = LoginAttempt.objects.get_or_create(username=username)
         obj.count += 1
-        obj.timestamp = self.generate_timestamp()
+        obj.timestamp = timezone.now()
         obj.save()
-
-    def generate_timestamp(self):
-        use_tz = getattr(settings, "USE_TZ", False)
-        if use_tz:
-            return timezone.localtime()
-        else:
-            return datetime.datetime.now()
 
 
 class Log(models.Model):
