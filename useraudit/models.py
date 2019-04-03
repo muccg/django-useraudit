@@ -3,7 +3,6 @@ import datetime
 import logging
 from django.db import models
 from django.utils import timezone
-from django.conf import settings
 from django.contrib.auth.signals import user_logged_in
 from .signals import password_has_expired, account_has_expired, login_failure_limit_reached
 
