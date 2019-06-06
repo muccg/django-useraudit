@@ -21,8 +21,6 @@ def test_request_available(request):
 
 
 def reactivate_user(request, user_id):
-    assert False, reverse("admin:useraudit_loginattempt_changelist")
-
     user = _get_user(user_id)
     user.is_active = True
     user.save()
