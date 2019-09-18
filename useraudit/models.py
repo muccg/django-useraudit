@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
-import datetime
 import logging
 from django.db import models
 from django.contrib.auth.signals import user_logged_in
+from django.utils import timezone
 from .signals import password_has_expired, account_has_expired, login_failure_limit_reached
 
 
@@ -20,14 +20,14 @@ class LoginAttemptLogger(object):
     def reset(self, username):
         defaults = {
             'count': 0,
-            'timestamp': datetime.datetime.now()
+            'timestamp': timezone.now()
         }
         LoginAttempt.objects.update_or_create(username=username, defaults=defaults)
 
     def increment(self, username):
         obj, created = LoginAttempt.objects.get_or_create(username=username)
         obj.count += 1
-        obj.timestamp = datetime.datetime.now()
+        obj.timestamp = timezone.now()
         obj.save()
 
 
