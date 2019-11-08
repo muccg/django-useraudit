@@ -30,3 +30,4 @@ class Command(BaseCommand):
             return
         user.is_active = True
         user.save()
+        UserDeactivation.objects.filter(username=user.username).delete()
