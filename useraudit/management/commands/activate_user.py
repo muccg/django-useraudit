@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
 from django.db import transaction
-
+from useraudit.models import UserDeactivation
 
 class Command(BaseCommand):
     help = """
