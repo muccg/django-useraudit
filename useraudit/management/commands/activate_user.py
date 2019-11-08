@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from useraudit.models import UserDeactivation
 
+
 class Command(BaseCommand):
     help = """
        Activates an inactive user.
