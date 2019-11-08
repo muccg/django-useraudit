@@ -22,10 +22,11 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development"
     ],
-    zip_safe=True,
+    zip_safe=False,
     packages=[
         'useraudit',
         'useraudit.migrations',
+        'useraudit.management.commands',
     ],
-    include_package_date=True,
+    include_package_data=True,
 )
